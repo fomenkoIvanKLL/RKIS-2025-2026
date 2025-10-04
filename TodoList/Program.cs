@@ -60,6 +60,9 @@ namespace Todolist
                             AddTodo(ref todos, ref todoCount, task);
                         }
                         break;
+                    case "view":
+                        ViewTodos(todos, todoCount);
+                        break;
                     case "exit":
                         Console.WriteLine("Выход из программы...");
                         return;
@@ -76,6 +79,7 @@ namespace Todolist
             Console.WriteLine("help    - вывести список команд");
             Console.WriteLine("profile - показать данные пользователя");
             Console.WriteLine("add     - добавить задачу");
+            Console.WriteLine("view    - показать все задачи");
             Console.WriteLine("exit    - выход из программы");
         }
 
@@ -106,6 +110,21 @@ namespace Todolist
             todos[todoCount] = task;
             todoCount++;
             Console.WriteLine("Задача добавлена!");
+        }
+
+        static void ViewTodos(string[] todos, int todoCount)
+        {
+            if (todoCount == 0)
+            {
+                Console.WriteLine("Список задач пуст");
+                return;
+            }
+            
+            Console.WriteLine("Список задач:");
+            for (int i = 0; i < todoCount; i++)
+            {
+                Console.WriteLine($"{i + 1}. {todos[i]}");
+            }
         }
     }
 }
