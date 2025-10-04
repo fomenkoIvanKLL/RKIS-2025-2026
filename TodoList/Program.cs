@@ -9,15 +9,15 @@ namespace Todolist
             Console.WriteLine("Работу выполнили Фоменко и Мартиросьян");
 
             Console.Write("Введите ваше имя: ");
-            string firstName = Console.ReadLine();
+            string? firstName = Console.ReadLine();
 
             Console.Write("Введите вашу фамилию: ");
-            string lastName = Console.ReadLine();
+            string? lastName = Console.ReadLine();
 
             Console.Write("Введите ваш год рождения: ");
-            string yearBirthString = Console.ReadLine();
+            string? yearBirthString = Console.ReadLine();
 
-            int yearBirth = int.Parse(yearBirthString);
+            int yearBirth = int.Parse(yearBirthString ?? "0");
             int age = DateTime.Now.Year - yearBirth;
 
             Console.WriteLine($"Добавлен пользователь {firstName} {lastName}, возраст – {age}");
@@ -33,7 +33,7 @@ namespace Todolist
             while (true)
             {
                 Console.Write("> ");
-                string input = Console.ReadLine();
+                string? input = Console.ReadLine();
                 
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
@@ -47,7 +47,7 @@ namespace Todolist
                         ShowHelp();
                         break;
                     case "profile":
-                        ShowProfile(firstName, lastName, yearBirth);
+                        ShowProfile(firstName ?? "Неизвестно", lastName ?? "Неизвестно", yearBirth);
                         break;
                     case "add":
                         if (parts.Length < 2)
