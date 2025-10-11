@@ -7,11 +7,16 @@ namespace TodoList
     {
         private const int InitialCapacity = 2;
         private const string TasksFile = "tasks.txt";
+        private const string ProfileFile = "profile.txt";
         
         private static string[] tasks = new string[InitialCapacity];
         private static bool[] statuses = new bool[InitialCapacity];
         private static DateTime[] dates = new DateTime[InitialCapacity];
         private static int taskCount = 0;
+
+        private static string userName = "";
+        private static string userSurname = "";
+        private static DateTime userBirthDate = DateTime.MinValue;
 
         static void Main(string[] args)
         {
@@ -33,6 +38,7 @@ namespace TodoList
         static void Initialize()
         {
             LoadTasksFromFile();
+            LoadProfileFromFile();
         }
 
         static void ShowWelcome()
@@ -55,6 +61,7 @@ namespace TodoList
                 case "done": MarkAsDone(parts); break;
                 case "delete": DeleteTask(parts); break;
                 case "update": UpdateTask(parts); break;
+                case "profile": ShowProfile(); break;
                 case "exit": ExitProgram(); break;
                 default: Console.WriteLine($"Неизвестная команда: {command}"); break;
             }
@@ -69,7 +76,64 @@ namespace TodoList
             Console.WriteLine("done <num>    - отметить задачу как выполненную");
             Console.WriteLine("delete <num>  - удалить задачу");
             Console.WriteLine("update <num> \"<text>\" - обновить текст задачи");
+            Console.WriteLine("profile       - показать профиль пользователя");
             Console.WriteLine("exit          - выйти из программы\n");
+        }
+
+        static void ShowProfile()
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                Console.WriteLine("Профиль не установлен");
+            }
+            else
+            {
+                Console.WriteLine("\n=== Профиль пользователя ===");
+                Console.WriteLine($"Имя: {userName}");
+                Console.WriteLine($"Фамилия: {userSurname}");
+                Console.WriteLine($"Дата рождения: {userBirthDate:dd.MM.yyyy}");
+                
+                if (userBirthDate != DateTime.MinValue)
+                {
+                    int age = DateTime.Now.Year - userBirthDate.Year;
+                    if (DateTime.Now < userBirthDate.AddYears(age)) age--;
+                    Console.WriteLine($"Возраст: {age} лет");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        static void SaveProfileToFile()
+        {
+            try
+            {
+                File.WriteAllText(ProfileFile, $"{userName}\n{userSurname}\n{userBirthDate}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при сохранении профиля: {ex.Message}");
+            }
+        }
+
+        static void LoadProfileFromFile()
+        {
+            if (!File.Exists(ProfileFile)) return;
+
+            try
+            {
+                string[] lines = File.ReadAllLines(ProfileFile);
+                if (lines.Length >= 3)
+                {
+                    userName = lines[0];
+                    userSurname = lines[1];
+                    if (DateTime.TryParse(lines[2], out DateTime birthDate))
+                        userBirthDate = birthDate;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при загрузке профиля: {ex.Message}");
+            }
         }
 
         static void AddTask(string[] parts)
@@ -263,6 +327,7 @@ namespace TodoList
         {
             Console.WriteLine("Сохранение данных...");
             SaveTasksToFile();
+            SaveProfileToFile();
             Console.WriteLine("Выход из программы. До свидания!");
             Environment.Exit(0);
         }
