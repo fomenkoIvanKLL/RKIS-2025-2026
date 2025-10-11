@@ -61,7 +61,7 @@ namespace TodoList
                 case "done": MarkAsDone(parts); break;
                 case "delete": DeleteTask(parts); break;
                 case "update": UpdateTask(parts); break;
-                case "profile": ShowProfile(); break;
+                case "profile": ProfileCommand(parts); break;
                 case "exit": ExitProgram(); break;
                 default: Console.WriteLine($"Неизвестная команда: {command}"); break;
             }
@@ -76,8 +76,57 @@ namespace TodoList
             Console.WriteLine("done <num>    - отметить задачу как выполненную");
             Console.WriteLine("delete <num>  - удалить задачу");
             Console.WriteLine("update <num> \"<text>\" - обновить текст задачи");
-            Console.WriteLine("profile       - показать профиль пользователя");
+            Console.WriteLine("profile       - управление profile пользователя");
             Console.WriteLine("exit          - выйти из программы\n");
+        }
+
+        static void ProfileCommand(string[] parts)
+        {
+            if (parts.Length == 1)
+            {
+                ShowProfile();
+                return;
+            }
+
+            string subCommand = parts[1].ToLower();
+            
+            switch (subCommand)
+            {
+                case "установить":
+                case "set":
+                    if (parts.Length >= 5)
+                        SetProfile(parts[2], parts[3], parts[4]);
+                    else
+                        Console.WriteLine("Ошибка: используйте формат: profile установить <имя> <фамилия> <дата_рождения>");
+                    break;
+                case "показать":
+                case "show":
+                    ShowProfile();
+                    break;
+                case "очистить":
+                case "clear":
+                    ClearProfile();
+                    break;
+                default:
+                    Console.WriteLine("Неизвестная подкоманда профиля");
+                    break;
+            }
+        }
+
+        static void SetProfile(string name, string surname, string birthDateStr)
+        {
+            if (DateTime.TryParse(birthDateStr, out DateTime birthDate))
+            {
+                userName = name;
+                userSurname = surname;
+                userBirthDate = birthDate;
+                Console.WriteLine($"Профиль установлен: {userName} {userSurname}, дата рождения: {userBirthDate:dd.MM.yyyy}");
+                SaveProfileToFile();
+            }
+            else
+            {
+                Console.WriteLine("Ошибка: неверный формат даты. Используйте формат ДД.ММ.ГГГГ");
+            }
         }
 
         static void ShowProfile()
@@ -101,6 +150,15 @@ namespace TodoList
                 }
                 Console.WriteLine();
             }
+        }
+
+        static void ClearProfile()
+        {
+            userName = "";
+            userSurname = "";
+            userBirthDate = DateTime.MinValue;
+            Console.WriteLine("Профиль очищен");
+            SaveProfileToFile();
         }
 
         static void SaveProfileToFile()
