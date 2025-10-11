@@ -67,28 +67,28 @@ namespace TodoList
                     ShowHelp();
                     break;
                 case "add":
-                    AddTask(commandParts);
+                    HandleAddCommand(commandParts);
                     break;
                 case "view":
-                    ViewTasks();
+                    HandleViewCommand();
                     break;
                 case "done":
-                    MarkTaskAsDone(commandParts);
+                    HandleDoneCommand(commandParts);
                     break;
                 case "delete":
-                    DeleteTask(commandParts);
+                    HandleDeleteCommand(commandParts);
                     break;
                 case "update":
-                    UpdateTask(commandParts);
+                    HandleUpdateCommand(commandParts);
                     break;
                 case "profile":
                     HandleProfileCommand(commandParts);
                     break;
                 case "exit":
-                    ExitApplication();
+                    HandleExitCommand();
                     break;
                 default:
-                    Console.WriteLine($"Неизвестная команда: {command}");
+                    ShowUnknownCommandError(command);
                     break;
             }
         }
@@ -104,6 +104,75 @@ namespace TodoList
             Console.WriteLine("update <num> \"<text>\" - обновить текст задачи");
             Console.WriteLine("profile       - управление профилем пользователя");
             Console.WriteLine("exit          - выйти из программы\n");
+        }
+
+        static void ShowUnknownCommandError(string command)
+        {
+            Console.WriteLine($"Неизвестная команда: {command}");
+        }
+
+        static void HandleAddCommand(string[] commandParts)
+        {
+            if (commandParts.Length < 2)
+            {
+                Console.WriteLine("Ошибка: укажите текст задачи");
+                return;
+            }
+
+            string taskText = string.Join(CommandSeparator.ToString(), commandParts, 1, commandParts.Length - 1);
+            AddNewTask(taskText);
+        }
+
+        static void HandleViewCommand()
+        {
+            DisplayAllTasks();
+        }
+
+        static void HandleDoneCommand(string[] commandParts)
+        {
+            if (commandParts.Length < 2 || !int.TryParse(commandParts[1], out int taskNumber))
+            {
+                Console.WriteLine("Ошибка: укажите номер задачи");
+                return;
+            }
+
+            MarkTaskAsCompleted(taskNumber);
+        }
+
+        static void HandleDeleteCommand(string[] commandParts)
+        {
+            if (commandParts.Length < 2 || !int.TryParse(commandParts[1], out int taskNumber))
+            {
+                Console.WriteLine("Ошибка: укажите номер задачи");
+                return;
+            }
+
+            DeleteTaskByNumber(taskNumber);
+        }
+
+        static void HandleUpdateCommand(string[] commandParts)
+        {
+            if (commandParts.Length < 3)
+            {
+                Console.WriteLine("Ошибка: укажите номер и новый текст задачи");
+                Console.WriteLine("Пример: update 1 \"Новый текст задачи\"");
+                return;
+            }
+
+            if (!int.TryParse(commandParts[1], out int taskNumber))
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+
+            string newText = string.Join(CommandSeparator.ToString(), commandParts, 2, commandParts.Length - 2);
+            
+            if (newText.StartsWith("\"") && newText.EndsWith("\""))
+            {
+                newText = newText.Substring(1, newText.Length - 2);
+            }
+
+            UpdateTaskText(taskNumber, newText);
         }
 
         static void HandleProfileCommand(string[] commandParts)
@@ -143,6 +212,93 @@ namespace TodoList
                     Console.WriteLine("Доступные подкоманды: установить, показать, очистить");
                     break;
             }
+        }
+
+        static void HandleExitCommand()
+        {
+            ExitApplication();
+        }
+
+        static void AddNewTask(string taskText)
+        {
+            EnsureArrayCapacity();
+            
+            tasks[taskCount] = taskText;
+            taskStatuses[taskCount] = false;
+            taskDates[taskCount] = DateTime.Now;
+            taskCount++;
+
+            Console.WriteLine($"Задача добавлена: {taskText}");
+            SaveTasksToFile();
+        }
+
+        static void DisplayAllTasks()
+        {
+            if (taskCount == 0)
+            {
+                Console.WriteLine("Список задач пуст");
+                return;
+            }
+
+            Console.WriteLine("\n№  Статус      Дата                Задача");
+            Console.WriteLine("--------------------------------------------");
+            
+            for (int i = 0; i < taskCount; i++)
+            {
+                string status = taskStatuses[i] ? "Сделано   " : "Не сделано";
+                string date = taskDates[i].ToString("dd.MM.yyyy HH:mm");
+                Console.WriteLine($"{i + 1,-2} {status} {date} {tasks[i]}");
+            }
+            Console.WriteLine();
+        }
+
+        static void MarkTaskAsCompleted(int taskNumber)
+        {
+            int taskIndex = taskNumber - 1;
+            if (!IsValidTaskIndex(taskIndex))
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+
+            taskStatuses[taskIndex] = true;
+            taskDates[taskIndex] = DateTime.Now;
+            
+            Console.WriteLine($"Задача '{tasks[taskIndex]}' отмечена как выполненная");
+            SaveTasksToFile();
+        }
+
+        static void DeleteTaskByNumber(int taskNumber)
+        {
+            int taskIndex = taskNumber - 1;
+            if (!IsValidTaskIndex(taskIndex))
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+
+            string deletedTask = tasks[taskIndex];
+            RemoveTaskAtIndex(taskIndex);
+            
+            Console.WriteLine($"Задача удалена: {deletedTask}");
+            SaveTasksToFile();
+        }
+
+        static void UpdateTaskText(int taskNumber, string newText)
+        {
+            int taskIndex = taskNumber - 1;
+            if (!IsValidTaskIndex(taskIndex))
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+
+            string oldText = tasks[taskIndex];
+            tasks[taskIndex] = newText;
+            taskDates[taskIndex] = DateTime.Now;
+            
+            Console.WriteLine($"Задача обновлена: '{oldText}' -> '{newText}'");
+            SaveTasksToFile();
         }
 
         static void SetUserProfile(string name, string surname, string birthDateString)
@@ -195,132 +351,22 @@ namespace TodoList
             SaveProfileToFile();
         }
 
-        static void SaveProfileToFile()
+        static bool IsValidTaskIndex(int index)
         {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(ProfileFileName))
-                {
-                    writer.WriteLine(userName);
-                    writer.WriteLine(userSurname);
-                    writer.WriteLine(userBirthDate);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка при сохранении профиля: {ex.Message}");
-            }
+            return index >= 0 && index < taskCount;
         }
 
-        static void LoadProfileFromFile()
+        static void EnsureArrayCapacity()
         {
-            if (!File.Exists(ProfileFileName))
-                return;
-
-            try
-            {
-                string[] lines = File.ReadAllLines(ProfileFileName);
-                if (lines.Length >= 3)
-                {
-                    userName = lines[0];
-                    userSurname = lines[1];
-                    if (DateTime.TryParse(lines[2], out DateTime birthDate))
-                    {
-                        userBirthDate = birthDate;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка при загрузке профиля: {ex.Message}");
-            }
-        }
-
-        static void AddTask(string[] commandParts)
-        {
-            if (commandParts.Length < 2)
-            {
-                Console.WriteLine("Ошибка: укажите текст задачи");
-                return;
-            }
-
-            string taskText = string.Join(CommandSeparator.ToString(), commandParts, 1, commandParts.Length - 1);
-            
-            // Проверяем место в массиве
             if (taskCount >= tasks.Length)
             {
                 ExpandArrays();
             }
-
-            tasks[taskCount] = taskText;
-            taskStatuses[taskCount] = false;
-            taskDates[taskCount] = DateTime.Now;
-            taskCount++;
-
-            Console.WriteLine($"Задача добавлена: {taskText}");
-            SaveTasksToFile();
         }
 
-        static void ViewTasks()
+        static void RemoveTaskAtIndex(int index)
         {
-            if (taskCount == 0)
-            {
-                Console.WriteLine("Список задач пуст");
-                return;
-            }
-
-            Console.WriteLine("\n№  Статус      Дата                Задача");
-            Console.WriteLine("--------------------------------------------");
-            
-            for (int i = 0; i < taskCount; i++)
-            {
-                string status = taskStatuses[i] ? "Сделано   " : "Не сделано";
-                string date = taskDates[i].ToString("dd.MM.yyyy HH:mm");
-                Console.WriteLine($"{i + 1,-2} {status} {date} {tasks[i]}");
-            }
-            Console.WriteLine();
-        }
-
-        static void MarkTaskAsDone(string[] commandParts)
-        {
-            if (commandParts.Length < 2 || !int.TryParse(commandParts[1], out int taskNumber))
-            {
-                Console.WriteLine("Ошибка: укажите номер задачи");
-                return;
-            }
-
-            int taskIndex = taskNumber - 1;
-            if (taskIndex < 0 || taskIndex >= taskCount)
-            {
-                Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
-            }
-
-            taskStatuses[taskIndex] = true;
-            taskDates[taskIndex] = DateTime.Now;
-            
-            Console.WriteLine($"Задача '{tasks[taskIndex]}' отмечена как выполненная");
-            SaveTasksToFile();
-        }
-
-        static void DeleteTask(string[] commandParts)
-        {
-            if (commandParts.Length < 2 || !int.TryParse(commandParts[1], out int taskNumber))
-            {
-                Console.WriteLine("Ошибка: укажите номер задачи");
-                return;
-            }
-
-            int taskIndex = taskNumber - 1;
-            if (taskIndex < 0 || taskIndex >= taskCount)
-            {
-                Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
-            }
-
-            string deletedTask = tasks[taskIndex];
-            
-            for (int i = taskIndex; i < taskCount - 1; i++)
+            for (int i = index; i < taskCount - 1; i++)
             {
                 tasks[i] = tasks[i + 1];
                 taskStatuses[i] = taskStatuses[i + 1];
@@ -332,46 +378,6 @@ namespace TodoList
             taskDates[taskCount - 1] = DateTime.MinValue;
             
             taskCount--;
-            
-            Console.WriteLine($"Задача удалена: {deletedTask}");
-            SaveTasksToFile();
-        }
-
-        static void UpdateTask(string[] commandParts)
-        {
-            if (commandParts.Length < 3)
-            {
-                Console.WriteLine("Ошибка: укажите номер и новый текст задачи");
-                Console.WriteLine("Пример: update 1 \"Новый текст задачи\"");
-                return;
-            }
-
-            if (!int.TryParse(commandParts[1], out int taskNumber))
-            {
-                Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
-            }
-
-            int taskIndex = taskNumber - 1;
-            if (taskIndex < 0 || taskIndex >= taskCount)
-            {
-                Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
-            }
-
-            string newText = string.Join(CommandSeparator.ToString(), commandParts, 2, commandParts.Length - 2);
-            
-            if (newText.StartsWith("\"") && newText.EndsWith("\""))
-            {
-                newText = newText.Substring(1, newText.Length - 2);
-            }
-
-            string oldText = tasks[taskIndex];
-            tasks[taskIndex] = newText;
-            taskDates[taskIndex] = DateTime.Now;
-            
-            Console.WriteLine($"Задача обновлена: '{oldText}' -> '{newText}'");
-            SaveTasksToFile();
         }
 
         static void ExpandArrays()
@@ -389,7 +395,6 @@ namespace TodoList
                 newDates[i] = taskDates[i];
             }
             
-            // Заменяем старые массивы
             tasks = newTasks;
             taskStatuses = newStatuses;
             taskDates = newDates;
@@ -451,6 +456,47 @@ namespace TodoList
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при загрузке: {ex.Message}");
+            }
+        }
+
+        static void SaveProfileToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(ProfileFileName))
+                {
+                    writer.WriteLine(userName);
+                    writer.WriteLine(userSurname);
+                    writer.WriteLine(userBirthDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при сохранении профиля: {ex.Message}");
+            }
+        }
+
+        static void LoadProfileFromFile()
+        {
+            if (!File.Exists(ProfileFileName))
+                return;
+
+            try
+            {
+                string[] lines = File.ReadAllLines(ProfileFileName);
+                if (lines.Length >= 3)
+                {
+                    userName = lines[0];
+                    userSurname = lines[1];
+                    if (DateTime.TryParse(lines[2], out DateTime birthDate))
+                    {
+                        userBirthDate = birthDate;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при загрузке профиля: {ex.Message}");
             }
         }
 
