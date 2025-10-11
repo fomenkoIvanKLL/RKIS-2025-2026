@@ -9,6 +9,8 @@ namespace TodoList
         private const int ArrayExpansionMultiplier = 2;
         private const string TasksFileName = "tasks.txt";
         private const string ProfileFileName = "profile.txt";
+        private const char TaskSeparator = '|';
+        private const char CommandSeparator = ' ';
         
         private static string[] tasks;
         private static bool[] taskStatuses;
@@ -56,7 +58,7 @@ namespace TodoList
 
         static void ProcessCommand(string input)
         {
-            string[] commandParts = input.Split(' ');
+            string[] commandParts = input.Split(CommandSeparator);
             string command = commandParts[0].ToLower();
 
             switch (command)
@@ -242,7 +244,7 @@ namespace TodoList
                 return;
             }
 
-            string taskText = string.Join(" ", commandParts, 1, commandParts.Length - 1);
+            string taskText = string.Join(CommandSeparator.ToString(), commandParts, 1, commandParts.Length - 1);
             
             // Проверяем место в массиве
             if (taskCount >= tasks.Length)
@@ -357,7 +359,7 @@ namespace TodoList
                 return;
             }
 
-            string newText = string.Join(" ", commandParts, 2, commandParts.Length - 2);
+            string newText = string.Join(CommandSeparator.ToString(), commandParts, 2, commandParts.Length - 2);
             
             if (newText.StartsWith("\"") && newText.EndsWith("\""))
             {
@@ -403,7 +405,7 @@ namespace TodoList
                 {
                     for (int i = 0; i < taskCount; i++)
                     {
-                        writer.WriteLine($"{tasks[i]}|{taskStatuses[i]}|{taskDates[i]}");
+                        writer.WriteLine($"{tasks[i]}{TaskSeparator}{taskStatuses[i]}{TaskSeparator}{taskDates[i]}");
                     }
                 }
             }
@@ -426,7 +428,7 @@ namespace TodoList
                     if (string.IsNullOrWhiteSpace(line))
                         continue;
 
-                    string[] parts = line.Split('|');
+                    string[] parts = line.Split(TaskSeparator);
                     if (parts.Length >= 3)
                     {
                         if (taskCount >= tasks.Length)
