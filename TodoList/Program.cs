@@ -9,6 +9,8 @@ namespace TodoList
         private const string TasksFile = "tasks.txt";
         
         private static string[] tasks = new string[InitialCapacity];
+        private static bool[] statuses = new bool[InitialCapacity];
+        private static DateTime[] dates = new DateTime[InitialCapacity];
         private static int taskCount = 0;
 
         static void Main(string[] args)
@@ -78,6 +80,8 @@ namespace TodoList
                 ExpandArrays();
 
             tasks[taskCount] = taskText;
+            statuses[taskCount] = false;
+            dates[taskCount] = DateTime.Now;
             taskCount++;
 
             Console.WriteLine($"Задача добавлена: {taskText}");
@@ -92,10 +96,14 @@ namespace TodoList
                 return;
             }
 
-            Console.WriteLine("\nСписок задач:");
+            Console.WriteLine("\n№  Статус      Дата                Задача");
+            Console.WriteLine("--------------------------------------------");
+            
             for (int i = 0; i < taskCount; i++)
             {
-                Console.WriteLine($"{i + 1}. {tasks[i]}");
+                string status = statuses[i] ? "Сделано   " : "Не сделано";
+                string date = dates[i].ToString("dd.MM.yyyy HH:mm");
+                Console.WriteLine($"{i + 1,-2} {status} {date} {tasks[i]}");
             }
             Console.WriteLine();
         }
@@ -103,9 +111,18 @@ namespace TodoList
         static void ExpandArrays()
         {
             int newSize = tasks.Length * 2;
+
             string[] newTasks = new string[newSize];
+            bool[] newStatuses = new bool[newSize];
+            DateTime[] newDates = new DateTime[newSize];
+            
             Array.Copy(tasks, newTasks, taskCount);
+            Array.Copy(statuses, newStatuses, taskCount);
+            Array.Copy(dates, newDates, taskCount);
+            
             tasks = newTasks;
+            statuses = newStatuses;
+            dates = newDates;
         }
 
         static void SaveTasksToFile()
@@ -114,7 +131,7 @@ namespace TodoList
             {
                 using StreamWriter writer = new StreamWriter(TasksFile);
                 for (int i = 0; i < taskCount; i++)
-                    writer.WriteLine($"{tasks[i]}");
+                    writer.WriteLine($"{tasks[i]}|{statuses[i]}|{dates[i]}");
             }
             catch (Exception ex)
             {
@@ -133,11 +150,17 @@ namespace TodoList
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
 
-                    if (taskCount >= tasks.Length)
-                        ExpandArrays();
+                    string[] parts = line.Split('|');
+                    if (parts.Length >= 3)
+                    {
+                        if (taskCount >= tasks.Length)
+                            ExpandArrays();
 
-                    tasks[taskCount] = line;
-                    taskCount++;
+                        tasks[taskCount] = parts[0];
+                        statuses[taskCount] = bool.Parse(parts[1]);
+                        dates[taskCount] = DateTime.Parse(parts[2]);
+                        taskCount++;
+                    }
                 }
             }
             catch (Exception ex)
