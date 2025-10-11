@@ -11,6 +11,8 @@ namespace TodoList
         private const string ProfileFileName = "profile.txt";
         private const char TaskSeparator = '|';
         private const char CommandSeparator = ' ';
+        private const int MinimumTaskTextLength = 1;
+        private const int MaximumTaskTextLength = 500;
         
         private static string[] tasks;
         private static bool[] taskStatuses;
@@ -120,6 +122,10 @@ namespace TodoList
             }
 
             string taskText = string.Join(CommandSeparator.ToString(), commandParts, 1, commandParts.Length - 1);
+            
+            if (!ValidateTaskText(taskText))
+                return;
+                
             AddNewTask(taskText);
         }
 
@@ -132,7 +138,7 @@ namespace TodoList
         {
             if (commandParts.Length < 2 || !int.TryParse(commandParts[1], out int taskNumber))
             {
-                Console.WriteLine("Ошибка: укажите номер задачи");
+                Console.WriteLine("Ошибка: укажите корректный номер задачи");
                 return;
             }
 
@@ -143,7 +149,7 @@ namespace TodoList
         {
             if (commandParts.Length < 2 || !int.TryParse(commandParts[1], out int taskNumber))
             {
-                Console.WriteLine("Ошибка: укажите номер задачи");
+                Console.WriteLine("Ошибка: укажите корректный номер задачи");
                 return;
             }
 
@@ -171,6 +177,9 @@ namespace TodoList
             {
                 newText = newText.Substring(1, newText.Length - 2);
             }
+
+            if (!ValidateTaskText(newText))
+                return;
 
             UpdateTaskText(taskNumber, newText);
         }
@@ -209,6 +218,9 @@ namespace TodoList
         {
             if (commandParts.Length >= 5)
             {
+                if (!ValidateProfileData(commandParts[2], commandParts[3], commandParts[4]))
+                    return;
+                    
                 SetUserProfile(commandParts[2], commandParts[3], commandParts[4]);
             }
             else
@@ -227,6 +239,52 @@ namespace TodoList
         static void HandleExitCommand()
         {
             ExitApplication();
+        }
+
+        static bool ValidateTaskText(string taskText)
+        {
+            if (string.IsNullOrWhiteSpace(taskText))
+            {
+                Console.WriteLine("Ошибка: текст задачи не может быть пустым");
+                return false;
+            }
+
+            if (taskText.Length < MinimumTaskTextLength)
+            {
+                Console.WriteLine($"Ошибка: текст задачи должен содержать минимум {MinimumTaskTextLength} символ");
+                return false;
+            }
+
+            if (taskText.Length > MaximumTaskTextLength)
+            {
+                Console.WriteLine($"Ошибка: текст задачи не может превышать {MaximumTaskTextLength} символов");
+                return false;
+            }
+
+            return true;
+        }
+
+        static bool ValidateProfileData(string name, string surname, string birthDateString)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                Console.WriteLine("Ошибка: имя не может быть пустым");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(surname))
+            {
+                Console.WriteLine("Ошибка: фамилия не может быть пустой");
+                return false;
+            }
+
+            if (!DateTime.TryParse(birthDateString, out _))
+            {
+                Console.WriteLine("Ошибка: неверный формат даты. Используйте формат ДД.ММ.ГГГГ");
+                return false;
+            }
+
+            return true;
         }
 
         static void AddNewTask(string taskText)
@@ -268,6 +326,12 @@ namespace TodoList
             if (!IsValidTaskIndex(taskIndex))
             {
                 Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+
+            if (taskStatuses[taskIndex])
+            {
+                Console.WriteLine("Задача уже отмечена как выполненная");
                 return;
             }
 
@@ -321,10 +385,6 @@ namespace TodoList
                 
                 Console.WriteLine($"Профиль установлен: {userName} {userSurname}, дата рождения: {userBirthDate:dd.MM.yyyy}");
                 SaveProfileToFile();
-            }
-            else
-            {
-                Console.WriteLine("Ошибка: неверный формат даты. Используйте формат ДД.ММ.ГГГГ");
             }
         }
 
@@ -433,7 +493,7 @@ namespace TodoList
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при сохранении: {ex.Message}");
+                Console.WriteLine($"Ошибка при сохранении задач: {ex.Message}");
             }
         }
 
@@ -472,7 +532,7 @@ namespace TodoList
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при загрузке: {ex.Message}");
+                Console.WriteLine($"Ошибка при загрузке задач: {ex.Message}");
             }
         }
 
