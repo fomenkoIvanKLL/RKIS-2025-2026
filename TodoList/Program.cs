@@ -14,9 +14,9 @@ namespace TodoList
         private const int MinimumTaskTextLength = 1;
         private const int MaximumTaskTextLength = 500;
         
-        private static string[] tasks;
-        private static bool[] taskStatuses;
-        private static DateTime[] taskDates;
+        private static string[] tasks = null!;
+        private static bool[] taskStatuses = null!;
+        private static DateTime[] taskDates = null!;
         private static int taskCount;
 
         private static string userName = "";
@@ -31,7 +31,7 @@ namespace TodoList
             while (true)
             {
                 Console.Write("> ");
-                string input = Console.ReadLine();
+                string? input = Console.ReadLine();
                 
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
@@ -315,7 +315,8 @@ namespace TodoList
             {
                 string status = taskStatuses[i] ? "Сделано   " : "Не сделано";
                 string date = taskDates[i].ToString("dd.MM.yyyy HH:mm");
-                Console.WriteLine($"{i + 1,-2} {status} {date} {tasks[i]}");
+                string task = tasks[i] ?? "[пустая задача]";
+                Console.WriteLine($"{i + 1,-2} {status} {date} {task}");
             }
             Console.WriteLine();
         }
@@ -338,7 +339,8 @@ namespace TodoList
             taskStatuses[taskIndex] = true;
             taskDates[taskIndex] = DateTime.Now;
             
-            Console.WriteLine($"Задача '{tasks[taskIndex]}' отмечена как выполненная");
+            string taskText = tasks[taskIndex] ?? "[пустая задача]";
+            Console.WriteLine($"Задача '{taskText}' отмечена как выполненная");
             SaveTasksToFile();
         }
 
@@ -351,7 +353,7 @@ namespace TodoList
                 return;
             }
 
-            string deletedTask = tasks[taskIndex];
+            string deletedTask = tasks[taskIndex] ?? "[пустая задача]";
             RemoveTaskAtIndex(taskIndex);
             
             Console.WriteLine($"Задача удалена: {deletedTask}");
@@ -367,7 +369,7 @@ namespace TodoList
                 return;
             }
 
-            string oldText = tasks[taskIndex];
+            string oldText = tasks[taskIndex] ?? "[пустая задача]";
             tasks[taskIndex] = newText;
             taskDates[taskIndex] = DateTime.Now;
             
@@ -450,9 +452,12 @@ namespace TodoList
                 taskDates[i] = taskDates[i + 1];
             }
             
-            tasks[taskCount - 1] = null;
-            taskStatuses[taskCount - 1] = false;
-            taskDates[taskCount - 1] = DateTime.MinValue;
+            if (taskCount > 0)
+            {
+                tasks[taskCount - 1] = null!;
+                taskStatuses[taskCount - 1] = false;
+                taskDates[taskCount - 1] = DateTime.MinValue;
+            }
             
             taskCount--;
         }
@@ -487,7 +492,8 @@ namespace TodoList
                 {
                     for (int i = 0; i < taskCount; i++)
                     {
-                        writer.WriteLine($"{tasks[i]}{TaskSeparator}{taskStatuses[i]}{TaskSeparator}{taskDates[i]}");
+                        string task = tasks[i] ?? "";
+                        writer.WriteLine($"{task}{TaskSeparator}{taskStatuses[i]}{TaskSeparator}{taskDates[i]}");
                     }
                 }
             }
@@ -563,8 +569,8 @@ namespace TodoList
                 string[] lines = File.ReadAllLines(ProfileFileName);
                 if (lines.Length >= 3)
                 {
-                    userName = lines[0];
-                    userSurname = lines[1];
+                    userName = lines[0] ?? "";
+                    userSurname = lines[1] ?? "";
                     if (DateTime.TryParse(lines[2], out DateTime birthDate))
                     {
                         userBirthDate = birthDate;
