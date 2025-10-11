@@ -52,6 +52,7 @@ namespace TodoList
                 case "help": ShowHelp(); break;
                 case "add": AddTask(parts); break;
                 case "view": ViewTasks(); break;
+                case "done": MarkAsDone(parts); break;
                 case "exit": ExitProgram(); break;
                 default: Console.WriteLine($"Неизвестная команда: {command}"); break;
             }
@@ -63,6 +64,7 @@ namespace TodoList
             Console.WriteLine("help          - показать эту справку");
             Console.WriteLine("add <task>    - добавить новую задачу");
             Console.WriteLine("view          - показать все задачи");
+            Console.WriteLine("done <num>    - отметить задачу как выполненную");
             Console.WriteLine("exit          - выйти из программы\n");
         }
 
@@ -106,6 +108,27 @@ namespace TodoList
                 Console.WriteLine($"{i + 1,-2} {status} {date} {tasks[i]}");
             }
             Console.WriteLine();
+        }
+
+        static void MarkAsDone(string[] parts)
+        {
+            if (parts.Length < 2 || !int.TryParse(parts[1], out int taskNumber))
+            {
+                Console.WriteLine("Ошибка: укажите номер задачи");
+                return;
+            }
+
+            int index = taskNumber - 1;
+            if (index < 0 || index >= taskCount)
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+
+            statuses[index] = true;
+            dates[index] = DateTime.Now;
+            Console.WriteLine($"Задача '{tasks[index]}' отмечена как выполненная");
+            SaveTasksToFile();
         }
 
         static void ExpandArrays()
