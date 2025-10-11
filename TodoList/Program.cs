@@ -204,6 +204,12 @@ namespace TodoList
 
             string taskText = string.Join(" ", parts, 1, parts.Length - 1);
             
+            if (string.IsNullOrWhiteSpace(taskText))
+            {
+                Console.WriteLine("Ошибка: текст задачи не может быть пустым");
+                return;
+            }
+            
             if (taskCount >= tasks.Length)
                 ExpandArrays();
 
@@ -248,6 +254,12 @@ namespace TodoList
             if (index < 0 || index >= taskCount)
             {
                 Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+
+            if (statuses[index])
+            {
+                Console.WriteLine("Задача уже отмечена как выполненная");
                 return;
             }
 
@@ -308,6 +320,12 @@ namespace TodoList
             }
 
             string newText = string.Join(" ", parts, 2, parts.Length - 2);
+            
+            if (string.IsNullOrWhiteSpace(newText))
+            {
+                Console.WriteLine("Ошибка: новый текст задачи не может быть пустым");
+                return;
+            }
             
             if (newText.StartsWith("\"") && newText.EndsWith("\""))
                 newText = newText.Substring(1, newText.Length - 2);
