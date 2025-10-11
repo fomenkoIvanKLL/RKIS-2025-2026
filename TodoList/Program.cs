@@ -179,7 +179,7 @@ namespace TodoList
         {
             if (commandParts.Length == 1)
             {
-                ShowUserProfile();
+                DisplayUserProfile();
                 return;
             }
 
@@ -189,29 +189,39 @@ namespace TodoList
             {
                 case "установить":
                 case "set":
-                    if (commandParts.Length >= 5)
-                    {
-                        SetUserProfile(commandParts[2], commandParts[3], commandParts[4]);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ошибка: используйте формат: profile установить <имя> <фамилия> <дата_рождения>");
-                        Console.WriteLine("Пример: profile установить Иван Иванов 15.05.1990");
-                    }
+                    HandleSetProfileCommand(commandParts);
                     break;
                 case "показать":
                 case "show":
-                    ShowUserProfile();
+                    DisplayUserProfile();
                     break;
                 case "очистить":
                 case "clear":
                     ClearUserProfile();
                     break;
                 default:
-                    Console.WriteLine("Неизвестная подкоманда профиля");
-                    Console.WriteLine("Доступные подкоманды: установить, показать, очистить");
+                    ShowUnknownProfileSubcommandError();
                     break;
             }
+        }
+
+        static void HandleSetProfileCommand(string[] commandParts)
+        {
+            if (commandParts.Length >= 5)
+            {
+                SetUserProfile(commandParts[2], commandParts[3], commandParts[4]);
+            }
+            else
+            {
+                Console.WriteLine("Ошибка: используйте формат: profile установить <имя> <фамилия> <дата_рождения>");
+                Console.WriteLine("Пример: profile установить Иван Иванов 15.05.1990");
+            }
+        }
+
+        static void ShowUnknownProfileSubcommandError()
+        {
+            Console.WriteLine("Неизвестная подкоманда профиля");
+            Console.WriteLine("Доступные подкоманды: установить, показать, очистить");
         }
 
         static void HandleExitCommand()
@@ -318,7 +328,7 @@ namespace TodoList
             }
         }
 
-        static void ShowUserProfile()
+        static void DisplayUserProfile()
         {
             if (string.IsNullOrEmpty(userName))
             {
@@ -334,12 +344,19 @@ namespace TodoList
                 
                 if (userBirthDate != DateTime.MinValue)
                 {
-                    int age = DateTime.Now.Year - userBirthDate.Year;
-                    if (DateTime.Now < userBirthDate.AddYears(age)) age--;
+                    int age = CalculateUserAge();
                     Console.WriteLine($"Возраст: {age} лет");
                 }
                 Console.WriteLine();
             }
+        }
+
+        static int CalculateUserAge()
+        {
+            int age = DateTime.Now.Year - userBirthDate.Year;
+            if (DateTime.Now < userBirthDate.AddYears(age)) 
+                age--;
+            return age;
         }
 
         static void ClearUserProfile()
