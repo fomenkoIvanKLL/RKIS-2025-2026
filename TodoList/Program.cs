@@ -41,6 +41,7 @@ namespace TodoList
                 case "view": ViewTasks(); break;
                 case "done": MarkAsDone(parts); break;
                 case "delete": DeleteTask(parts); break;
+                case "update": UpdateTask(parts); break;
                 case "exit": ExitProgram(); break;
                 default: Console.WriteLine($"Неизвестная команда: {command}"); break;
             }
@@ -54,6 +55,7 @@ namespace TodoList
             Console.WriteLine("view          - показать все задачи");
             Console.WriteLine("done <num>    - отметить задачу как выполненную");
             Console.WriteLine("delete <num>  - удалить задачу");
+            Console.WriteLine("update <num> \"<text>\" - обновить текст задачи");
             Console.WriteLine("exit          - выйти из программы");
         }
 
@@ -131,6 +133,33 @@ namespace TodoList
             }
             taskCount--;
             Console.WriteLine($"Задача удалена: {deletedTask}");
+        }
+
+        static void UpdateTask(string[] parts)
+        {
+            if (parts.Length < 3)
+            {
+                Console.WriteLine("Ошибка: укажите номер и новый текст задачи");
+                return;
+            }
+            if (!int.TryParse(parts[1], out int taskNumber))
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+            int index = taskNumber - 1;
+            if (index < 0 || index >= taskCount)
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+            string newText = string.Join(" ", parts, 2, parts.Length - 2);
+            if (newText.StartsWith("\"") && newText.EndsWith("\""))
+                newText = newText.Substring(1, newText.Length - 2);
+            string oldText = tasks[index];
+            tasks[index] = newText;
+            dates[index] = DateTime.Now;
+            Console.WriteLine($"Задача обновлена: '{oldText}' -> '{newText}'");
         }
 
         static void ExpandArrays()
