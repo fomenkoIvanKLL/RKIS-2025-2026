@@ -9,6 +9,9 @@ namespace TodoList
         private static bool[] statuses = new bool[InitialCapacity];
         private static DateTime[] dates = new DateTime[InitialCapacity];
         private static int taskCount = 0;
+        private static string userName = "";
+        private static string userSurname = "";
+        private static DateTime userBirthDate = DateTime.MinValue;
 
         static void Main(string[] args)
         {
@@ -42,6 +45,7 @@ namespace TodoList
                 case "done": MarkAsDone(parts); break;
                 case "delete": DeleteTask(parts); break;
                 case "update": UpdateTask(parts); break;
+                case "profile": ShowProfile(); break;
                 case "exit": ExitProgram(); break;
                 default: Console.WriteLine($"Неизвестная команда: {command}"); break;
             }
@@ -56,7 +60,29 @@ namespace TodoList
             Console.WriteLine("done <num>    - отметить задачу как выполненную");
             Console.WriteLine("delete <num>  - удалить задачу");
             Console.WriteLine("update <num> \"<text>\" - обновить текст задачи");
+            Console.WriteLine("profile       - показать профиль пользователя");
             Console.WriteLine("exit          - выйти из программы");
+        }
+
+        static void ShowProfile()
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                Console.WriteLine("Профиль не установлен");
+            }
+            else
+            {
+                Console.WriteLine("=== Профиль пользователя ===");
+                Console.WriteLine($"Имя: {userName}");
+                Console.WriteLine($"Фамилия: {userSurname}");
+                Console.WriteLine($"Дата рождения: {userBirthDate:dd.MM.yyyy}");
+                if (userBirthDate != DateTime.MinValue)
+                {
+                    int age = DateTime.Now.Year - userBirthDate.Year;
+                    if (DateTime.Now < userBirthDate.AddYears(age)) age--;
+                    Console.WriteLine($"Возраст: {age} лет");
+                }
+            }
         }
 
         static void AddTask(string[] parts)
