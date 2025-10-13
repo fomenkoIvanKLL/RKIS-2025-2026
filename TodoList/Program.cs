@@ -6,6 +6,8 @@ namespace TodoList
     {
         private const int InitialCapacity = 2;
         private static string[] tasks = new string[InitialCapacity];
+        private static bool[] statuses = new bool[InitialCapacity];
+        private static DateTime[] dates = new DateTime[InitialCapacity];
         private static int taskCount = 0;
 
         static void Main(string[] args)
@@ -62,6 +64,8 @@ namespace TodoList
             if (taskCount >= tasks.Length)
                 ExpandArrays();
             tasks[taskCount] = taskText;
+            statuses[taskCount] = false;
+            dates[taskCount] = DateTime.Now;
             taskCount++;
             Console.WriteLine($"Задача добавлена: {taskText}");
         }
@@ -73,10 +77,13 @@ namespace TodoList
                 Console.WriteLine("Список задач пуст");
                 return;
             }
-            Console.WriteLine("Список задач:");
+            Console.WriteLine("№  Статус      Дата                Задача");
+            Console.WriteLine("--------------------------------------------");
             for (int i = 0; i < taskCount; i++)
             {
-                Console.WriteLine($"{i + 1}. {tasks[i]}");
+                string status = statuses[i] ? "Сделано   " : "Не сделано";
+                string date = dates[i].ToString("dd.MM.yyyy HH:mm");
+                Console.WriteLine($"{i + 1,-2} {status} {date} {tasks[i]}");
             }
         }
 
@@ -84,8 +91,14 @@ namespace TodoList
         {
             int newSize = tasks.Length * 2;
             string[] newTasks = new string[newSize];
+            bool[] newStatuses = new bool[newSize];
+            DateTime[] newDates = new DateTime[newSize];
             Array.Copy(tasks, newTasks, taskCount);
+            Array.Copy(statuses, newStatuses, taskCount);
+            Array.Copy(dates, newDates, taskCount);
             tasks = newTasks;
+            statuses = newStatuses;
+            dates = newDates;
         }
 
         static void ExitProgram()
