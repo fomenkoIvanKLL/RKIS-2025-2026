@@ -40,6 +40,7 @@ namespace TodoList
                 case "add": AddTask(parts); break;
                 case "view": ViewTasks(); break;
                 case "done": MarkAsDone(parts); break;
+                case "delete": DeleteTask(parts); break;
                 case "exit": ExitProgram(); break;
                 default: Console.WriteLine($"Неизвестная команда: {command}"); break;
             }
@@ -52,6 +53,7 @@ namespace TodoList
             Console.WriteLine("add <task>    - добавить новую задачу");
             Console.WriteLine("view          - показать все задачи");
             Console.WriteLine("done <num>    - отметить задачу как выполненную");
+            Console.WriteLine("delete <num>  - удалить задачу");
             Console.WriteLine("exit          - выйти из программы");
         }
 
@@ -105,6 +107,30 @@ namespace TodoList
             statuses[index] = true;
             dates[index] = DateTime.Now;
             Console.WriteLine($"Задача '{tasks[index]}' отмечена как выполненная");
+        }
+
+        static void DeleteTask(string[] parts)
+        {
+            if (parts.Length < 2 || !int.TryParse(parts[1], out int taskNumber))
+            {
+                Console.WriteLine("Ошибка: укажите номер задачи");
+                return;
+            }
+            int index = taskNumber - 1;
+            if (index < 0 || index >= taskCount)
+            {
+                Console.WriteLine("Ошибка: неверный номер задачи");
+                return;
+            }
+            string deletedTask = tasks[index];
+            for (int i = index; i < taskCount - 1; i++)
+            {
+                tasks[i] = tasks[i + 1];
+                statuses[i] = statuses[i + 1];
+                dates[i] = dates[i + 1];
+            }
+            taskCount--;
+            Console.WriteLine($"Задача удалена: {deletedTask}");
         }
 
         static void ExpandArrays()
