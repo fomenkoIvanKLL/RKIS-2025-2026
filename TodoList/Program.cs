@@ -72,6 +72,11 @@ namespace TodoList
             {
                 if (part == fullFlag || part == shortFlag)
                     return true;
+                if (part.StartsWith("-") && part.Length > 1 && !part.StartsWith("--"))
+                {
+                    if (part.Contains(shortFlag.Replace("-", "")))
+                        return true;
+                }
             }
             return false;
         }
