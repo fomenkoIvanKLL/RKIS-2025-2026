@@ -15,7 +15,10 @@ namespace TodoList
 
         static void Main(string[] args)
         {
-            ShowWelcome();
+            Console.WriteLine("=== Todo List Application ===");
+            Console.WriteLine("Практическую работу 5 сделали: Фоменко и Мартиросьян");
+            Console.WriteLine("Введите 'help' для списка команд");
+            
             while (true)
             {
                 Console.Write("> ");
@@ -24,13 +27,6 @@ namespace TodoList
                     continue;
                 ProcessCommand(input);
             }
-        }
-
-        static void ShowWelcome()
-        {
-            Console.WriteLine("=== Todo List Application ===");
-            Console.WriteLine("Практическую работу 5 сделали: Фоменко и Мартиросьян");
-            Console.WriteLine("Введите 'help' для списка команд");
         }
 
         static void ProcessCommand(string input)
@@ -65,13 +61,6 @@ namespace TodoList
             Console.WriteLine("update <num> \"<text>\"       - обновить текст задачи");
             Console.WriteLine("profile                       - управление профилем пользователя");
             Console.WriteLine("exit                          - выйти из программы");
-            Console.WriteLine();
-            Console.WriteLine("Флаги для команды view:");
-            Console.WriteLine("  --index, -i       - показывать индекс задачи");
-            Console.WriteLine("  --status, -s      - показывать статус задачи");
-            Console.WriteLine("  --update-date, -d - показывать дату изменения");
-            Console.WriteLine("  --all, -a         - показывать все данные");
-            Console.WriteLine("Комбинации флагов: view -is, view --index --status и т.д.");
         }
 
         static bool HasFlag(string[] parts, string fullFlag, string shortFlag)
@@ -80,11 +69,6 @@ namespace TodoList
             {
                 if (part == fullFlag || part == shortFlag)
                     return true;
-                if (part.StartsWith("-") && part.Length > 1 && !part.StartsWith("--"))
-                {
-                    if (part.Contains(shortFlag.Replace("-", "")))
-                        return true;
-                }
             }
             return false;
         }
@@ -167,34 +151,18 @@ namespace TodoList
                 showDate = true;
             }
 
-            if (!showIndex && !showStatus && !showDate)
-            {
-                for (int i = 0; i < taskCount; i++)
-                {
-                    string taskPreview = tasks[i].Length > 30 ? tasks[i].Substring(0, 30) + "..." : tasks[i];
-                    Console.WriteLine(taskPreview);
-                }
-                return;
-            }
-
-            string header = "";
-            if (showIndex) header += $"{"№",-6}";
-            if (showStatus) header += $"{"Статус",-8}";
-            if (showDate) header += $"{"Дата",-16}";
-            header += "Задача";
-            Console.WriteLine(header);
-            Console.WriteLine(new string('-', header.Length));
-
             for (int i = 0; i < taskCount; i++)
             {
-                string line = "";
-                if (showIndex) line += $"{i + 1,-6}";
-                if (showStatus) line += $"{(statuses[i] ? "Сделано" : "Не сд."),-8}";
-                if (showDate) line += $"{dates[i]:dd.MM.yyyy HH:mm,-16}";
-                
+                string output = "";
+                if (showIndex)
+                    output += $"{i + 1}. ";
+                if (showStatus)
+                    output += $"{(statuses[i] ? "[✓]" : "[ ]")} ";
                 string taskPreview = tasks[i].Length > 30 ? tasks[i].Substring(0, 30) + "..." : tasks[i];
-                line += taskPreview;
-                Console.WriteLine(line);
+                output += taskPreview;
+                if (showDate)
+                    output += $" ({dates[i]:dd.MM.yyyy HH:mm})";
+                Console.WriteLine(output);
             }
         }
 
