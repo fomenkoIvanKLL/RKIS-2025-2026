@@ -160,7 +160,7 @@ namespace TodoList
             {
                 for (int i = 0; i < taskCount; i++)
                 {
-                    string taskPreview = tasks[i].Length > 30 ? tasks[i].Substring(0, 30) + "..." : tasks[i];
+                    string taskPreview = GetTaskPreview(tasks[i]);
                     Console.WriteLine(taskPreview);
                 }
                 return;
@@ -181,10 +181,18 @@ namespace TodoList
                 if (showStatus) line += $"{(statuses[i] ? "Сделано" : "Не сд."),-8}";
                 if (showDate) line += $"{dates[i]:dd.MM.yyyy HH:mm,-16}";
                 
-                string taskPreview = tasks[i].Length > 30 ? tasks[i].Substring(0, 30) + "..." : tasks[i];
+                string taskPreview = GetTaskPreview(tasks[i]);
                 line += taskPreview;
                 Console.WriteLine(line);
             }
+        }
+
+        static string GetTaskPreview(string taskText)
+        {
+            if (taskText.Length <= 30)
+                return taskText;
+            
+            return taskText.Substring(0, 27) + "...";
         }
 
         static void ReadTask(string[] parts)
