@@ -55,15 +55,23 @@ namespace TodoList
         static void ShowHelp()
         {
             Console.WriteLine("Доступные команды:");
-            Console.WriteLine("help          - показать эту справку");
-            Console.WriteLine("add [--multiline|-m] <task> - добавить задачу");
-            Console.WriteLine("view [--index|-i] [--status|-s] [--update-date|-d] [--all|-a] - показать задачи");
-            Console.WriteLine("read <idx>    - прочитать полный текст задачи");
-            Console.WriteLine("done <num>    - отметить задачу как выполненную");
-            Console.WriteLine("delete <num>  - удалить задачу");
-            Console.WriteLine("update <num> \"<text>\" - обновить текст задачи");
-            Console.WriteLine("profile       - управление profile пользователя");
-            Console.WriteLine("exit          - выйти из программы");
+            Console.WriteLine("help                          - показать эту справку");
+            Console.WriteLine("add [--multiline|-m] <task>   - добавить задачу (многострочный режим с флагом)");
+            Console.WriteLine("view [--index|-i] [--status|-s] [--update-date|-d] [--all|-a]");
+            Console.WriteLine("                              - показать задачи с флагами отображения");
+            Console.WriteLine("read <idx>                    - прочитать полный текст задачи");
+            Console.WriteLine("done <num>                    - отметить задачу как выполненную");
+            Console.WriteLine("delete <num>                  - удалить задачу");
+            Console.WriteLine("update <num> \"<text>\"       - обновить текст задачи");
+            Console.WriteLine("profile                       - управление профилем пользователя");
+            Console.WriteLine("exit                          - выйти из программы");
+            Console.WriteLine();
+            Console.WriteLine("Флаги для команды view:");
+            Console.WriteLine("  --index, -i       - показывать индекс задачи");
+            Console.WriteLine("  --status, -s      - показывать статус задачи");
+            Console.WriteLine("  --update-date, -d - показывать дату изменения");
+            Console.WriteLine("  --all, -a         - показывать все данные");
+            Console.WriteLine("Комбинации флагов: view -is, view --index --status и т.д.");
         }
 
         static bool HasFlag(string[] parts, string fullFlag, string shortFlag)
@@ -169,11 +177,6 @@ namespace TodoList
                 return;
             }
 
-            int indexWidth = showIndex ? 6 : 0;
-            int statusWidth = showStatus ? 8 : 0;
-            int dateWidth = showDate ? 16 : 0;
-            int textWidth = 30;
-
             string header = "";
             if (showIndex) header += $"{"№",-6}";
             if (showStatus) header += $"{"Статус",-8}";
@@ -189,7 +192,7 @@ namespace TodoList
                 if (showStatus) line += $"{(statuses[i] ? "Сделано" : "Не сд."),-8}";
                 if (showDate) line += $"{dates[i]:dd.MM.yyyy HH:mm,-16}";
                 
-                string taskPreview = tasks[i].Length > textWidth ? tasks[i].Substring(0, textWidth) + "..." : tasks[i];
+                string taskPreview = tasks[i].Length > 30 ? tasks[i].Substring(0, 30) + "..." : tasks[i];
                 line += taskPreview;
                 Console.WriteLine(line);
             }
