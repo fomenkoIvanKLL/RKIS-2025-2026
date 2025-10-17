@@ -147,18 +147,39 @@ namespace TodoList
                 showDate = true;
             }
 
+            if (!showIndex && !showStatus && !showDate)
+            {
+                for (int i = 0; i < taskCount; i++)
+                {
+                    string taskPreview = tasks[i].Length > 30 ? tasks[i].Substring(0, 30) + "..." : tasks[i];
+                    Console.WriteLine(taskPreview);
+                }
+                return;
+            }
+
+            int indexWidth = showIndex ? 6 : 0;
+            int statusWidth = showStatus ? 8 : 0;
+            int dateWidth = showDate ? 16 : 0;
+            int textWidth = 30;
+
+            string header = "";
+            if (showIndex) header += $"{"№",-6}";
+            if (showStatus) header += $"{"Статус",-8}";
+            if (showDate) header += $"{"Дата",-16}";
+            header += "Задача";
+            Console.WriteLine(header);
+            Console.WriteLine(new string('-', header.Length));
+
             for (int i = 0; i < taskCount; i++)
             {
-                string output = "";
-                if (showIndex)
-                    output += $"{i + 1}. ";
-                if (showStatus)
-                    output += $"{(statuses[i] ? "[✓]" : "[ ]")} ";
-                string taskPreview = tasks[i].Length > 30 ? tasks[i].Substring(0, 30) + "..." : tasks[i];
-                output += taskPreview;
-                if (showDate)
-                    output += $" ({dates[i]:dd.MM.yyyy HH:mm})";
-                Console.WriteLine(output);
+                string line = "";
+                if (showIndex) line += $"{i + 1,-6}";
+                if (showStatus) line += $"{(statuses[i] ? "Сделано" : "Не сд."),-8}";
+                if (showDate) line += $"{dates[i]:dd.MM.yyyy HH:mm,-16}";
+                
+                string taskPreview = tasks[i].Length > textWidth ? tasks[i].Substring(0, textWidth) + "..." : tasks[i];
+                line += taskPreview;
+                Console.WriteLine(line);
             }
         }
 
