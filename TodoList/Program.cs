@@ -19,7 +19,7 @@ namespace TodoList
             while (true)
             {
                 Console.Write("> ");
-                string input = Console.ReadLine();
+                string? input = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
                 ProcessCommand(input);
@@ -123,12 +123,19 @@ namespace TodoList
             string taskText = "";
             while (true)
             {
-                string line = Console.ReadLine();
+                string? line = Console.ReadLine();
+                if (line == null)
+                    continue;
                 if (line == "end")
                     break;
                 taskText += line + "\n";
             }
             taskText = taskText.TrimEnd('\n');
+            if (string.IsNullOrWhiteSpace(taskText))
+            {
+                Console.WriteLine("Ошибка: текст задачи не может быть пустым");
+                return;
+            }
             AddSingleTask(taskText);
         }
 
