@@ -61,6 +61,13 @@ namespace TodoList
             Console.WriteLine("update <num> \"<text>\"       - обновить текст задачи");
             Console.WriteLine("profile                       - управление профилем пользователя");
             Console.WriteLine("exit                          - выйти из программы");
+            Console.WriteLine();
+            Console.WriteLine("Флаги для команды view:");
+            Console.WriteLine("  --index, -i       - показывать индекс задачи");
+            Console.WriteLine("  --status, -s      - показывать статус задачи");
+            Console.WriteLine("  --update-date, -d - показывать дату изменения");
+            Console.WriteLine("  --all, -a         - показывать все данные");
+            Console.WriteLine("Комбинации флагов: view -is, view --index --status и т.д.");
         }
 
         static bool HasFlag(string[] parts, string fullFlag, string shortFlag)
