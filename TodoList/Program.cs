@@ -4,19 +4,13 @@ namespace TodoList
 {
     class Program
     {
-        private const int InitialCapacity = 2;
-        private static string[] tasks = new string[InitialCapacity];
-        private static bool[] statuses = new bool[InitialCapacity];
-        private static DateTime[] dates = new DateTime[InitialCapacity];
-        private static int taskCount = 0;
-        private static string userName = "";
-        private static string userSurname = "";
-        private static DateTime userBirthDate = DateTime.MinValue;
+        private static TodoList todoList = new TodoList();
+        private static Profile userProfile = null;
 
         static void Main(string[] args)
         {
             Console.WriteLine("=== Todo List Application ===");
-            Console.WriteLine("Практическую работу 5 сделали: Фоменко и Мартиросьян");
+            Console.WriteLine("Практическую работу 6 сделали: Фоменко и Мартиросьян");
             Console.WriteLine("Введите 'help' для списка команд");
             
             while (true)
@@ -61,13 +55,6 @@ namespace TodoList
             Console.WriteLine("update <num> \"<text>\"       - обновить текст задачи");
             Console.WriteLine("profile                       - управление профилем пользователя");
             Console.WriteLine("exit                          - выйти из программы");
-            Console.WriteLine();
-            Console.WriteLine("Флаги для команды view:");
-            Console.WriteLine("  --index, -i       - показывать индекс задачи");
-            Console.WriteLine("  --status, -s      - показывать статус задачи");
-            Console.WriteLine("  --update-date, -d - показывать дату изменения");
-            Console.WriteLine("  --all, -a         - показывать все данные");
-            Console.WriteLine("Комбинации флагов: view -is, view --index --status и т.д.");
         }
 
         static bool HasFlag(string[] parts, string fullFlag, string shortFlag)
@@ -112,12 +99,8 @@ namespace TodoList
                 Console.WriteLine("Ошибка: текст задачи не может быть пустым");
                 return;
             }
-            if (taskCount >= tasks.Length)
-                ExpandArrays();
-            tasks[taskCount] = taskText;
-            statuses[taskCount] = false;
-            dates[taskCount] = DateTime.Now;
-            taskCount++;
+            TodoItem newItem = new TodoItem(taskText);
+            todoList.Add(newItem);
             Console.WriteLine($"Задача добавлена: {taskText}");
         }
 
@@ -145,12 +128,6 @@ namespace TodoList
 
         static void ViewTasks(string[] parts)
         {
-            if (taskCount == 0)
-            {
-                Console.WriteLine("Список задач пуст");
-                return;
-            }
-
             bool showIndex = HasFlag(parts, "--index", "-i");
             bool showStatus = HasFlag(parts, "--status", "-s");
             bool showDate = HasFlag(parts, "--update-date", "-d");
@@ -163,43 +140,7 @@ namespace TodoList
                 showDate = true;
             }
 
-            if (!showIndex && !showStatus && !showDate)
-            {
-                for (int i = 0; i < taskCount; i++)
-                {
-                    string taskPreview = GetTaskPreview(tasks[i]);
-                    Console.WriteLine(taskPreview);
-                }
-                return;
-            }
-
-            string header = "";
-            if (showIndex) header += $"{"№",-6}";
-            if (showStatus) header += $"{"Статус",-8}";
-            if (showDate) header += $"{"Дата",-16}";
-            header += "Задача";
-            Console.WriteLine(header);
-            Console.WriteLine(new string('-', header.Length));
-
-            for (int i = 0; i < taskCount; i++)
-            {
-                string line = "";
-                if (showIndex) line += $"{i + 1,-6}";
-                if (showStatus) line += $"{(statuses[i] ? "Сделано" : "Не сд."),-8}";
-                if (showDate) line += $"{dates[i]:dd.MM.yyyy HH:mm,-16}";
-                
-                string taskPreview = GetTaskPreview(tasks[i]);
-                line += taskPreview;
-                Console.WriteLine(line);
-            }
-        }
-
-        static string GetTaskPreview(string taskText)
-        {
-            if (taskText.Length <= 30)
-                return taskText;
-            
-            return taskText.Substring(0, 27) + "...";
+            todoList.View(showIndex, true, showDate);
         }
 
         static void ReadTask(string[] parts)
@@ -210,15 +151,16 @@ namespace TodoList
                 return;
             }
             int index = taskNumber - 1;
-            if (index < 0 || index >= taskCount)
+            try
+            {
+                TodoItem item = todoList.GetItem(index);
+                Console.WriteLine($"Задача {taskNumber}:");
+                Console.WriteLine(item.GetFullInfo());
+            }
+            catch (ArgumentOutOfRangeException)
             {
                 Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
             }
-            Console.WriteLine($"Задача {taskNumber}:");
-            Console.WriteLine($"Текст: {tasks[index]}");
-            Console.WriteLine($"Статус: {(statuses[index] ? "Выполнена" : "Не выполнена")}");
-            Console.WriteLine($"Дата изменения: {dates[index]:dd.MM.yyyy HH:mm}");
         }
 
         static void MarkAsDone(string[] parts)
@@ -229,19 +171,21 @@ namespace TodoList
                 return;
             }
             int index = taskNumber - 1;
-            if (index < 0 || index >= taskCount)
+            try
+            {
+                TodoItem item = todoList.GetItem(index);
+                if (item.IsDone)
+                {
+                    Console.WriteLine("Задача уже отмечена как выполненная");
+                    return;
+                }
+                item.MarkDone();
+                Console.WriteLine($"Задача '{item.Text}' отмечена как выполненная");
+            }
+            catch (ArgumentOutOfRangeException)
             {
                 Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
             }
-            if (statuses[index])
-            {
-                Console.WriteLine("Задача уже отмечена как выполненная");
-                return;
-            }
-            statuses[index] = true;
-            dates[index] = DateTime.Now;
-            Console.WriteLine($"Задача '{tasks[index]}' отмечена как выполненная");
         }
 
         static void DeleteTask(string[] parts)
@@ -252,20 +196,16 @@ namespace TodoList
                 return;
             }
             int index = taskNumber - 1;
-            if (index < 0 || index >= taskCount)
+            try
+            {
+                TodoItem item = todoList.GetItem(index);
+                todoList.Delete(index);
+                Console.WriteLine($"Задача удалена: {item.Text}");
+            }
+            catch (ArgumentOutOfRangeException)
             {
                 Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
             }
-            string deletedTask = tasks[index];
-            for (int i = index; i < taskCount - 1; i++)
-            {
-                tasks[i] = tasks[i + 1];
-                statuses[i] = statuses[i + 1];
-                dates[i] = dates[i + 1];
-            }
-            taskCount--;
-            Console.WriteLine($"Задача удалена: {deletedTask}");
         }
 
         static void UpdateTask(string[] parts)
@@ -281,30 +221,35 @@ namespace TodoList
                 return;
             }
             int index = taskNumber - 1;
-            if (index < 0 || index >= taskCount)
+            try
+            {
+                TodoItem item = todoList.GetItem(index);
+                string newText = string.Join(" ", parts, 2, parts.Length - 2);
+                if (string.IsNullOrWhiteSpace(newText))
+                {
+                    Console.WriteLine("Ошибка: новый текст задачи не может быть пустым");
+                    return;
+                }
+                if (newText.StartsWith("\"") && newText.EndsWith("\""))
+                    newText = newText.Substring(1, newText.Length - 2);
+                string oldText = item.Text;
+                item.UpdateText(newText);
+                Console.WriteLine($"Задача обновлена: '{oldText}' -> '{newText}'");
+            }
+            catch (ArgumentOutOfRangeException)
             {
                 Console.WriteLine("Ошибка: неверный номер задачи");
-                return;
             }
-            string newText = string.Join(" ", parts, 2, parts.Length - 2);
-            if (string.IsNullOrWhiteSpace(newText))
-            {
-                Console.WriteLine("Ошибка: новый текст задачи не может быть пустым");
-                return;
-            }
-            if (newText.StartsWith("\"") && newText.EndsWith("\""))
-                newText = newText.Substring(1, newText.Length - 2);
-            string oldText = tasks[index];
-            tasks[index] = newText;
-            dates[index] = DateTime.Now;
-            Console.WriteLine($"Задача обновлена: '{oldText}' -> '{newText}'");
         }
 
         static void ProfileCommand(string[] parts)
         {
             if (parts.Length == 1)
             {
-                ShowProfile();
+                if (userProfile != null)
+                    Console.WriteLine(userProfile.GetInfo());
+                else
+                    Console.WriteLine("Профиль не установлен");
                 return;
             }
             string subCommand = parts[1].ToLower();
@@ -312,81 +257,30 @@ namespace TodoList
             {
                 case "установить":
                 case "set":
-                    if (parts.Length >= 5)
-                        SetProfile(parts[2], parts[3], parts[4]);
+                    if (parts.Length >= 5 && int.TryParse(parts[4], out int birthYear))
+                    {
+                        userProfile = new Profile(parts[2], parts[3], birthYear);
+                        Console.WriteLine($"Профиль установлен: {userProfile.GetInfo()}");
+                    }
                     else
-                        Console.WriteLine("Ошибка: используйте формат: profile установить <имя> <фамилия> <дата_рождения>");
+                        Console.WriteLine("Ошибка: используйте формат: profile установить <имя> <фамилия> <год_рождения>");
                     break;
                 case "показать":
                 case "show":
-                    ShowProfile();
+                    if (userProfile != null)
+                        Console.WriteLine(userProfile.GetInfo());
+                    else
+                        Console.WriteLine("Профиль не установлен");
                     break;
                 case "очистить":
                 case "clear":
-                    ClearProfile();
+                    userProfile = null;
+                    Console.WriteLine("Профиль очищен");
                     break;
                 default:
                     Console.WriteLine("Неизвестная подкоманда профиля");
                     break;
             }
-        }
-
-        static void SetProfile(string name, string surname, string birthDateStr)
-        {
-            if (DateTime.TryParse(birthDateStr, out DateTime birthDate))
-            {
-                userName = name;
-                userSurname = surname;
-                userBirthDate = birthDate;
-                Console.WriteLine($"Профиль установлен: {userName} {userSurname}, дата рождения: {userBirthDate:dd.MM.yyyy}");
-            }
-            else
-            {
-                Console.WriteLine("Ошибка: неверный формат даты. Используйте формат ДД.ММ.ГГГГ");
-            }
-        }
-
-        static void ShowProfile()
-        {
-            if (string.IsNullOrEmpty(userName))
-            {
-                Console.WriteLine("Профиль не установлен");
-            }
-            else
-            {
-                Console.WriteLine("=== Профиль пользователя ===");
-                Console.WriteLine($"Имя: {userName}");
-                Console.WriteLine($"Фамилия: {userSurname}");
-                Console.WriteLine($"Дата рождения: {userBirthDate:dd.MM.yyyy}");
-                if (userBirthDate != DateTime.MinValue)
-                {
-                    int age = DateTime.Now.Year - userBirthDate.Year;
-                    if (DateTime.Now < userBirthDate.AddYears(age)) age--;
-                    Console.WriteLine($"Возраст: {age} лет");
-                }
-            }
-        }
-
-        static void ClearProfile()
-        {
-            userName = "";
-            userSurname = "";
-            userBirthDate = DateTime.MinValue;
-            Console.WriteLine("Профиль очищен");
-        }
-
-        static void ExpandArrays()
-        {
-            int newSize = tasks.Length * 2;
-            string[] newTasks = new string[newSize];
-            bool[] newStatuses = new bool[newSize];
-            DateTime[] newDates = new DateTime[newSize];
-            Array.Copy(tasks, newTasks, taskCount);
-            Array.Copy(statuses, newStatuses, taskCount);
-            Array.Copy(dates, newDates, taskCount);
-            tasks = newTasks;
-            statuses = newStatuses;
-            dates = newDates;
         }
 
         static void ExitProgram()
