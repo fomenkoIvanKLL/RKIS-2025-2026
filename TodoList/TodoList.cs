@@ -76,6 +76,7 @@ namespace TodoList
             return items[index];
         }
 
+
         public int Count => count;
 
         private void IncreaseArray()
