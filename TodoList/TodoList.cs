@@ -17,7 +17,7 @@ namespace TodoList
         {
             if (count >= items.Length)
             {
-                IncreaseArray();
+                IncreaseArray(items, item);
             }
             items[count++] = item;
         }
@@ -76,13 +76,12 @@ namespace TodoList
             return items[index];
         }
 
-
         public int Count => count;
 
-        private void IncreaseArray()
+        private void IncreaseArray(TodoItem[] currentItems, TodoItem newItem)
         {
-            TodoItem[] newItems = new TodoItem[items.Length * 2];
-            Array.Copy(items, newItems, count);
+            TodoItem[] newItems = new TodoItem[currentItems.Length * 2];
+            Array.Copy(currentItems, newItems, count);
             items = newItems;
         }
     }
