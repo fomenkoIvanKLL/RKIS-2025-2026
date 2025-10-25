@@ -46,9 +46,8 @@ namespace TodoList
         {
             Console.WriteLine("Доступные команды:");
             Console.WriteLine("help                          - показать эту справку");
-            Console.WriteLine("add [--multiline|-m] <task>   - добавить задачу (многострочный режим с флагом)");
+            Console.WriteLine("add [--multiline|-m] <task>   - добавить задачу");
             Console.WriteLine("view [--index|-i] [--status|-s] [--update-date|-d] [--all|-a]");
-            Console.WriteLine("                              - показать задачи с флагами отображения");
             Console.WriteLine("read <idx>                    - прочитать полный текст задачи");
             Console.WriteLine("done <num>                    - отметить задачу как выполненную");
             Console.WriteLine("delete <num>                  - удалить задачу");
@@ -140,7 +139,7 @@ namespace TodoList
                 showDate = true;
             }
 
-            todoList.View(showIndex, true, showDate);
+            todoList.View(showIndex, showStatus, showDate);
         }
 
         static void ReadTask(string[] parts)
@@ -174,11 +173,6 @@ namespace TodoList
             try
             {
                 TodoItem item = todoList.GetItem(index);
-                if (item.IsDone)
-                {
-                    Console.WriteLine("Задача уже отмечена как выполненная");
-                    return;
-                }
                 item.MarkDone();
                 Console.WriteLine($"Задача '{item.Text}' отмечена как выполненная");
             }
@@ -232,9 +226,8 @@ namespace TodoList
                 }
                 if (newText.StartsWith("\"") && newText.EndsWith("\""))
                     newText = newText.Substring(1, newText.Length - 2);
-                string oldText = item.Text;
                 item.UpdateText(newText);
-                Console.WriteLine($"Задача обновлена: '{oldText}' -> '{newText}'");
+                Console.WriteLine($"Задача обновлена: '{item.Text}'");
             }
             catch (ArgumentOutOfRangeException)
             {
