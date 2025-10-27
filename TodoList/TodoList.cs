@@ -34,7 +34,7 @@ namespace TodoList
             count--;
         }
 
-        public void View(bool showIndex, bool showDone, bool showDate)
+        public void View(bool showIndex, bool showStatus, bool showDate)
         {
             if (count == 0)
             {
@@ -44,7 +44,7 @@ namespace TodoList
 
             string header = "";
             if (showIndex) header += "№".PadRight(6);
-            if (showDone) header += "Статус".PadRight(10);
+            if (showStatus) header += "Статус".PadRight(10);
             if (showDate) header += "Дата".PadRight(16);
             header += "Задача";
             
@@ -53,12 +53,9 @@ namespace TodoList
 
             for (int i = 0; i < count; i++)
             {
-                if (!showDone && items[i].IsDone)
-                    continue;
-
                 string line = "";
                 if (showIndex) line += $"{i + 1}".PadRight(6);
-                if (showDone) line += $"{(items[i].IsDone ? "Сделано" : "Не сд.")}".PadRight(10);
+                if (showStatus) line += $"{(items[i].IsDone ? "Сделано" : "Не сд.")}".PadRight(10);
                 if (showDate) line += $"{items[i].LastUpdate:dd.MM.yyyy HH:mm}".PadRight(16);
                 
                 string preview = items[i].Text.Length <= 30 ? 
