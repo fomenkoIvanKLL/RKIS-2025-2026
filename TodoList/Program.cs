@@ -9,7 +9,7 @@ namespace TodoList
 
         static void Main(string[] args)
         {
-            Console.WriteLine("=== Todo List Application ===");
+            Console.WriteLine("===  Todo List Application  ===");
             Console.WriteLine("Практическую работу 6 сделали: Фоменко и Мартиросьян");
             Console.WriteLine("Введите 'help' для списка команд");
             
