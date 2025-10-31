@@ -1,7 +1,7 @@
 namespace TodoList;
 
 public class ReadCommand: ICommand
-    {
+{
     public string[] parts { get; set; }
     public TodoList todoList { get; set; }
 
