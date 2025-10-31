@@ -189,11 +189,5 @@ namespace TodoList
                     break;
             }
         }
-
-        static void ExitProgram()
-        {
-            Console.WriteLine("Выход из программы. До свидания!");
-            Environment.Exit(0);
-        }
     }
 }
