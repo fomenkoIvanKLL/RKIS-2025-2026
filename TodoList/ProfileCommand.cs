@@ -1,16 +1,15 @@
 namespace TodoList;
 
-public class ProfileCommand: ICommand
+public class ProfileCommand(): ICommand
 {
     public string[] parts { get; set; }
-    public Profile? userProfile { get; set; }
 
     public void Execute()
     {
         if (parts.Length == 1)
         {
-            if (userProfile != null)
-                Console.WriteLine(userProfile.GetInfo());
+            if (CommandParser.userProfile != null)
+                Console.WriteLine(CommandParser.userProfile.GetInfo());
             else
                 Console.WriteLine("Профиль не установлен");
             return;
@@ -22,22 +21,22 @@ public class ProfileCommand: ICommand
             case "set":
                 if (parts.Length >= 5 && int.TryParse(parts[4], out int birthYear))
                 {
-                    userProfile = new Profile(parts[2], parts[3], birthYear);
-                    Console.WriteLine($"Профиль установлен: {userProfile.GetInfo()}");
+                    CommandParser.userProfile = new Profile(parts[2], parts[3], birthYear);
+                    Console.WriteLine($"Профиль установлен: {CommandParser.userProfile.GetInfo()}");
                 }
                 else
                     Console.WriteLine("Ошибка: используйте формат: profile установить <имя> <фамилия> <год_рождения>");
                 break;
             case "показать":
             case "show":
-                if (userProfile != null)
-                    Console.WriteLine(userProfile.GetInfo());
+                if (CommandParser.userProfile != null)
+                    Console.WriteLine(CommandParser.userProfile.GetInfo());
                 else
                     Console.WriteLine("Профиль не установлен");
                 break;
             case "очистить":
             case "clear":
-                userProfile = null;
+                CommandParser.userProfile = null;
                 Console.WriteLine("Профиль очищен");
                 break;
             default:

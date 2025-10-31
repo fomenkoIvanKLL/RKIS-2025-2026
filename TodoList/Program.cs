@@ -5,7 +5,7 @@ namespace TodoList
     class Program
     {
         private static TodoList todoList = new TodoList();
-        private static Profile userProfile = null;
+        private static Profile? userProfile = null;
 
         static void Main(string[] args)
         {
@@ -19,26 +19,8 @@ namespace TodoList
                 string? input = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
-                ProcessCommand(input);
-            }
-        }
-
-        static void ProcessCommand(string input)
-        {
-            string[] parts = input.Split(' ');
-            string command = parts[0].ToLower();
-            switch (command)
-            {
-                case "help": ShowHelp(); break;
-                case "add": AddTask(parts); break;
-                case "view": ViewTasks(parts); break;
-                case "read": ReadTask(parts); break;
-                case "done": MarkAsDone(parts); break;
-                case "delete": DeleteTask(parts); break;
-                case "update": UpdateTask(parts); break;
-                case "profile": ProfileCommand(parts); break;
-                case "exit": ExitProgram(); break;
-                default: Console.WriteLine($"Неизвестная команда: {command}"); break;
+                ICommand command = CommandParser.Parse(input, todoList, userProfile);
+                command.Execute();
             }
         }
 
