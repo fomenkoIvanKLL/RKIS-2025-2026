@@ -64,7 +64,7 @@ namespace TodoList
             Console.WriteLine("Комбинации флагов: view -is, view --index --status и т.д.");
         }
 
-        static bool HasFlag(string[] parts, string fullFlag, string shortFlag)
+        public static bool HasFlag(string[] parts, string fullFlag, string shortFlag)
         {
             foreach (string part in parts)
             {
@@ -77,61 +77,6 @@ namespace TodoList
                 }
             }
             return false;
-        }
-
-        static void AddTask(string[] parts)
-        {
-            bool multiline = HasFlag(parts, "--multiline", "-m");
-            
-            if (multiline)
-            {
-                AddMultilineTask();
-            }
-            else
-            {
-                if (parts.Length < 2)
-                {
-                    Console.WriteLine("Ошибка: укажите текст задачи");
-                    return;
-                }
-                string taskText = string.Join(" ", parts, 1, parts.Length - 1);
-                AddSingleTask(taskText);
-            }
-        }
-
-        static void AddSingleTask(string taskText)
-        {
-            if (string.IsNullOrWhiteSpace(taskText))
-            {
-                Console.WriteLine("Ошибка: текст задачи не может быть пустым");
-                return;
-            }
-            TodoItem newItem = new TodoItem(taskText);
-            todoList.Add(newItem);
-            Console.WriteLine($"Задача добавлена: {taskText}");
-        }
-
-        static void AddMultilineTask()
-        {
-            Console.WriteLine("Введите текст задачи (для завершения введите 'end'):");
-            string taskText = "";
-            while (true)
-            {
-                Console.Write("> ");
-                string? line = Console.ReadLine();
-                if (line == null)
-                    continue;
-                if (line == "end")
-                    break;
-                taskText += line + "\n";
-            }
-            taskText = taskText.TrimEnd('\n');
-            if (string.IsNullOrWhiteSpace(taskText))
-            {
-                Console.WriteLine("Ошибка: текст задачи не может быть пустым");
-                return;
-            }
-            AddSingleTask(taskText);
         }
 
         static void ViewTasks(string[] parts)
