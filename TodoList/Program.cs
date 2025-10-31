@@ -57,23 +57,6 @@ namespace TodoList
             return false;
         }
 
-        static void ViewTasks(string[] parts)
-        {
-            bool showIndex = HasFlag(parts, "--index", "-i");
-            bool showStatus = HasFlag(parts, "--status", "-s");
-            bool showDate = HasFlag(parts, "--update-date", "-d");
-            bool showAll = HasFlag(parts, "--all", "-a");
-
-            if (showAll)
-            {
-                showIndex = true;
-                showStatus = true;
-                showDate = true;
-            }
-
-            todoList.View(showIndex, showStatus, showDate);
-        }
-
         static void ReadTask(string[] parts)
         {
             if (parts.Length < 2 || !int.TryParse(parts[1], out int taskNumber))
