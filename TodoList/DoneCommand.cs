@@ -1,10 +1,10 @@
 namespace TodoList;
 
-public class DeleteCommand: ICommand
+public class DoneCommand: ICommand
 {
     public string[] parts { get; set; }
     public TodoList todoList { get; set; }
-
+    
     public void Execute()
     {
         if (parts.Length < 2 || !int.TryParse(parts[1], out int taskNumber))
@@ -16,8 +16,8 @@ public class DeleteCommand: ICommand
         try
         {
             TodoItem item = todoList.GetItem(index);
-            todoList.Delete(index);
-            Console.WriteLine($"Задача удалена: {item.Text}");
+            item.MarkDone();
+            Console.WriteLine($"Задача '{item.Text}' отмечена как выполненная");
         }
         catch (ArgumentOutOfRangeException)
         {

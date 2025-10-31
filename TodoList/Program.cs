@@ -116,27 +116,6 @@ namespace TodoList
             }
         }
 
-        static void MarkAsDone(string[] parts)
-        {
-            if (parts.Length < 2 || !int.TryParse(parts[1], out int taskNumber))
-            {
-                Console.WriteLine("Ошибка: укажите номер задачи");
-                return;
-            }
-            int index = taskNumber - 1;
-            try
-            {
-                TodoItem item = todoList.GetItem(index);
-                item.MarkDone();
-                Console.WriteLine($"Задача '{item.Text}' отмечена как выполненная");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                Console.WriteLine("Ошибка: неверный номер задачи");
-            }
-        }
-        
-
         static void UpdateTask(string[] parts)
         {
             if (parts.Length < 3)
