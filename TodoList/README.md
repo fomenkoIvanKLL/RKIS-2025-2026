@@ -7,14 +7,17 @@
 ### Классы:
 
 **TodoItem** - представляет одну задачу:
+
 - Свойства: Text, IsDone, LastUpdate
 - Методы: MarkDone(), UpdateText(), GetShortInfo(), GetFullInfo()
 
 **TodoList** - управляет коллекцией задач:
+
 - Приватное поле: массив TodoItem
 - Методы: Add(), Delete(), View(), GetItem(), IncreaseArray()
 
 **Profile** - профиль пользователя:
+
 - Свойства: FirstName, LastName, BirthYear
 - Метод: GetInfo()
 
@@ -50,7 +53,7 @@
 ## Флаги для команды view:
 
 - `--index, -i` - показывать индекс задачи
-- `--status, -s` - показывать статус задачи  
+- `--status, -s` - показывать статус задачи
 - `--update-date, -d` - показывать дату изменения
 - `--all, -a` - показывать все данные
 
