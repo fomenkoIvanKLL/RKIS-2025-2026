@@ -1,4 +1,6 @@
-﻿namespace TodoList;
+﻿using TodoList.commands;
+
+namespace TodoList;
 
 internal class Program
 {
