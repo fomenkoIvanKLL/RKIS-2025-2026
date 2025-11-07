@@ -2,9 +2,9 @@ namespace TodoList.commands;
 
 public class CommandParser
 {
-	public static Profile? userProfile { get; set; }
-
-	public static ICommand Parse(string input, TodoList todoList, Profile? profile)
+	public static Profile userProfile = FileManager.LoadProfile();
+	public static TodoList todoList = new();
+	public static ICommand Parse(string input)
 	{
 		var flags = ParseFlags(input);
 		var parts = input.Split(' ');
@@ -62,7 +62,8 @@ public class CommandParser
 			default: return new UnknownCommand();
 		}
 	}
-	public static string[] ParseFlags(string command)
+
+	private static string[] ParseFlags(string command)
 	{
 		var parts = command.Split(' ');
 		var flags = new List<string>();

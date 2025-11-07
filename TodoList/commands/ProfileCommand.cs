@@ -8,10 +8,7 @@ public class ProfileCommand : ICommand
 	{
 		if (parts.Length == 1)
 		{
-			if (CommandParser.userProfile != null)
-				Console.WriteLine(CommandParser.userProfile.GetInfo());
-			else
-				Console.WriteLine("Профиль не установлен");
+			Console.WriteLine(CommandParser.userProfile.GetInfo());
 			return;
 		}
 
@@ -23,6 +20,7 @@ public class ProfileCommand : ICommand
 				if (parts.Length >= 5 && int.TryParse(parts[4], out var birthYear))
 				{
 					CommandParser.userProfile = new Profile(parts[2], parts[3], birthYear);
+					FileManager.SaveProfile(CommandParser.userProfile);
 					Console.WriteLine($"Профиль установлен: {CommandParser.userProfile.GetInfo()}");
 				}
 				else
@@ -31,15 +29,7 @@ public class ProfileCommand : ICommand
 				break;
 			case "показать":
 			case "show":
-				if (CommandParser.userProfile != null)
-					Console.WriteLine(CommandParser.userProfile.GetInfo());
-				else
-					Console.WriteLine("Профиль не установлен");
-				break;
-			case "очистить":
-			case "clear":
-				CommandParser.userProfile = null;
-				Console.WriteLine("Профиль очищен");
+				Console.WriteLine(CommandParser.userProfile.GetInfo());
 				break;
 			default:
 				Console.WriteLine("Неизвестная подкоманда профиля");
