@@ -3,7 +3,7 @@ namespace TodoList.commands;
 public class CommandParser
 {
 	public static Profile userProfile = FileManager.LoadProfile();
-	public static TodoList todoList = new();
+	public static TodoList todoList = FileManager.LoadTodos();
 	public static ICommand Parse(string input)
 	{
 		var flags = ParseFlags(input);
