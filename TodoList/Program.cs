@@ -23,18 +23,4 @@ internal class Program
 			command.Execute();
 		}
 	}
-
-	public static bool HasFlag(string[] parts, string fullFlag, string shortFlag)
-	{
-		foreach (var part in parts)
-		{
-			if (part == fullFlag || part == shortFlag)
-				return true;
-			if (part.StartsWith("-") && part.Length > 1 && !part.StartsWith("--"))
-				if (part.Contains(shortFlag.Replace("-", "")))
-					return true;
-		}
-
-		return false;
-	}
 }

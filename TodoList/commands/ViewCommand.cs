@@ -2,23 +2,21 @@ namespace TodoList.commands;
 
 public class ViewCommand : ICommand
 {
-	public string[] parts { get; set; }
+	public bool ShowIndex { get; set; }
+	public bool ShowStatus { get; set; }
+	public bool ShowDate { get; set; }
+	public bool ShowAll { get; set; }
 	public TodoList todoList { get; set; }
 
 	public void Execute()
 	{
-		var showIndex = Program.HasFlag(parts, "--index", "-i");
-		var showStatus = Program.HasFlag(parts, "--status", "-s");
-		var showDate = Program.HasFlag(parts, "--update-date", "-d");
-		var showAll = Program.HasFlag(parts, "--all", "-a");
-
-		if (showAll)
+		if (ShowAll)
 		{
-			showIndex = true;
-			showStatus = true;
-			showDate = true;
+			ShowIndex = true;
+			ShowStatus = true;
+			ShowDate = true;
 		}
 
-		todoList.View(showIndex, showStatus, showDate);
+		todoList.View(ShowIndex, ShowStatus, ShowDate);
 	}
 }

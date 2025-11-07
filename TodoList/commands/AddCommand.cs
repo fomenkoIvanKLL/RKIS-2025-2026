@@ -3,12 +3,11 @@ namespace TodoList.commands;
 public class AddCommand : ICommand
 {
 	public string[] parts { get; set; }
+	public bool multiline { get; set; }
 	public TodoList todoList { get; set; }
 
 	public void Execute()
 	{
-		var multiline = Program.HasFlag(parts, "--multiline", "-m");
-
 		if (multiline)
 			AddMultilineTask();
 		else
