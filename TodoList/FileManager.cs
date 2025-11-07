@@ -1,3 +1,5 @@
+using TodoList.commands;
+
 namespace TodoList;
 
 public class FileManager
@@ -28,4 +30,19 @@ public class FileManager
 		var lines = File.ReadAllText(profilePath).Split(';');
 		return new Profile(lines[0], lines[1], int.Parse(lines[2]));
 	}
+	
+	public static void SaveTodos(TodoList todoList)
+	{
+		using var writer = new StreamWriter(todoPath, false);
+
+		for (var i = 0; i < todoList.Count; i++)
+		{
+			var item = todoList.items[i];
+			var text = EscapeCsv(item.Text);
+			writer.WriteLine($"{i};{text};{item.IsDone};{item.LastUpdate:O}");
+		}
+		string EscapeCsv(string text)
+			=> "\"" + text.Replace("\"", "\"\"").Replace("\n", "\\n") + "\"";
+	}
+
 }

@@ -20,6 +20,7 @@ internal class Program
 			
 			var command = CommandParser.Parse(input);
 			command.Execute();
+			FileManager.SaveTodos(CommandParser.todoList);
 		}
 	}
 }

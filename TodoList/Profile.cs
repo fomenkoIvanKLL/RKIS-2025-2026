@@ -18,11 +18,4 @@ public class Profile
 		var age = DateTime.Now.Year - BirthYear;
 		return $"{FirstName} {LastName}, возраст {age}";
 	}
-
-	public void UpdateProfile(string firstName, string lastName, int birthYear)
-	{
-		FirstName = firstName;
-		LastName = lastName;
-		BirthYear = birthYear;
-	}
 }

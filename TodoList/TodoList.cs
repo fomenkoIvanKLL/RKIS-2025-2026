@@ -2,7 +2,7 @@ namespace TodoList;
 
 public class TodoList
 {
-	private TodoItem[] items;
+	public TodoItem[] items;
 
 	public TodoList(int capacity = 10)
 	{
