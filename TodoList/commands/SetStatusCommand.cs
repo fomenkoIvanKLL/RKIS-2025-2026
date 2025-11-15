@@ -1,6 +1,6 @@
 namespace TodoList.commands;
 
-public class DoneCommand : ICommand
+public class SetStatusCommand : ICommand
 {
 	public string[] parts { get; set; }
 	public TodoList todoList { get; set; }
@@ -16,13 +16,14 @@ public class DoneCommand : ICommand
 		var index = taskNumber - 1;
 		try
 		{
+			var status = Enum.Parse<TodoStatus>(parts[2], true);
 			var item = todoList.GetItem(index);
-			item.MarkDone();
-			Console.WriteLine($"Задача '{item.Text}' отмечена как выполненная");
+			item.SetStatus(status);
+			Console.WriteLine($"Поставлен новый статус({status}) для задачи '{item.Text}' ");
 		}
-		catch (ArgumentOutOfRangeException)
+		catch (Exception ex)
 		{
-			Console.WriteLine("Ошибка: неверный номер задачи");
+			Console.WriteLine($"Ошибка: {ex.Message}");
 		}
 	}
 }

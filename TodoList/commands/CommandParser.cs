@@ -35,8 +35,8 @@ public class CommandParser
 					todoList = todoList,
 					parts = parts
 				};
-			case "done":
-				return new DoneCommand
+			case "setstatus":
+				return new SetStatusCommand
 				{
 					todoList = todoList,
 					parts = parts

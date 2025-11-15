@@ -29,11 +29,6 @@ public class TodoList
 
 	public void View(bool showIndex, bool showStatus, bool showDate)
 	{
-		if (Count == 0)
-		{
-			Console.WriteLine("Список задач пуст");
-			return;
-		}
 
 		var header = "";
 		if (showIndex) header += "№".PadRight(6);
@@ -48,7 +43,7 @@ public class TodoList
 		{
 			var line = "";
 			if (showIndex) line += $"{i + 1}".PadRight(6);
-			if (showStatus) line += $"{(items[i].IsDone ? "Сделано" : "Не сд.")}".PadRight(10);
+			if (showStatus) line += $"{items[i].Status}".PadRight(10);
 			if (showDate) line += $"{items[i].LastUpdate:dd.MM.yyyy HH:mm}".PadRight(16);
 
 			var preview = items[i].Text.Length <= 30 ? items[i].Text : items[i].Text.Substring(0, 27) + "...";

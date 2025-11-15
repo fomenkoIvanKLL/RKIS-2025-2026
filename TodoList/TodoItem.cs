@@ -5,23 +5,23 @@ public class TodoItem
 	public TodoItem(string text)
 	{
 		Text = text;
-		IsDone = false;
+		Status = TodoStatus.NotStarted;
 		LastUpdate = DateTime.Now;
 	}
-	public TodoItem(string text, bool isDone, DateTime lastUpdate)
+	public TodoItem(string text, TodoStatus status, DateTime lastUpdate)
 	{
 		Text = text;
-		IsDone = isDone;
+		Status = status;
 		LastUpdate = lastUpdate;
 	}
 
 	public string Text { get; private set; }
-	public bool IsDone { get; private set; }
+	public TodoStatus Status { get; private set; }
 	public DateTime LastUpdate { get; private set; }
 
-	public void MarkDone()
+	public void SetStatus(TodoStatus status)
 	{
-		IsDone = true;
+		Status = status;
 		LastUpdate = DateTime.Now;
 	}
 
@@ -31,16 +31,9 @@ public class TodoItem
 		LastUpdate = DateTime.Now;
 	}
 
-	public string GetShortInfo()
-	{
-		var preview = Text.Length <= 30 ? Text : Text.Substring(0, 27) + "...";
-		var status = IsDone ? "Выполнена" : "Не выполнена";
-		return $"{preview} | {status} | {LastUpdate:dd.MM.yyyy HH:mm}";
-	}
-
 	public string GetFullInfo()
 	{
 		return
-			$"Текст: {Text}\nСтатус: {(IsDone ? "Выполнена" : "Не выполнена")}\nДата изменения: {LastUpdate:dd.MM.yyyy HH:mm}";
+			$"Текст: {Text}\nСтатус: {Status}\nДата изменения: {LastUpdate:dd.MM.yyyy HH:mm}";
 	}
 }

@@ -1,5 +1,3 @@
-using TodoList.commands;
-
 namespace TodoList;
 
 public class FileManager
@@ -39,7 +37,7 @@ public class FileManager
 		{
 			var item = todoList.items[i];
 			var text = EscapeCsv(item.Text);
-			writer.WriteLine($"{i};{text};{item.IsDone};{item.LastUpdate:O}");
+			writer.WriteLine($"{i};{text};{item.Status};{item.LastUpdate:O}");
 		}
 		string EscapeCsv(string text)
 			=> "\"" + text.Replace("\"", "\"\"").Replace("\n", "\\n") + "\"";
@@ -55,10 +53,10 @@ public class FileManager
 			var parts = line.Split(';');
 
 			var text = UnescapeCsv(parts[1]);
-			var isDone = bool.Parse(parts[2]);
+			var status = Enum.Parse<TodoStatus>(parts[2]);
 			var lastUpdate = DateTime.Parse(parts[3]);
 
-			list.Add(new TodoItem(text, isDone, lastUpdate));
+			list.Add(new TodoItem(text, status, lastUpdate));
 		}
 
 		return list;
