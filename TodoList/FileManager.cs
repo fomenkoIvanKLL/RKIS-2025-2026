@@ -33,7 +33,7 @@ public class FileManager
 	{
 		using var writer = new StreamWriter(todoPath, false);
 
-		for (var i = 0; i < todoList.Count; i++)
+		for (var i = 0; i < todoList.items.Count; i++)
 		{
 			var item = todoList.items[i];
 			var text = EscapeCsv(item.Text);

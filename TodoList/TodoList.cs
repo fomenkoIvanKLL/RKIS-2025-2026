@@ -1,30 +1,21 @@
+using System.Collections;
+
 namespace TodoList;
 
-public class TodoList
+public class TodoList : IEnumerable<TodoItem>
 {
-	public TodoItem[] items;
-
-	public TodoList(int capacity = 10)
-	{
-		items = new TodoItem[capacity];
-		Count = 0;
-	}
-
-	public int Count { get; private set; }
+	public List<TodoItem> items = [];
+	public IEnumerator<TodoItem> GetEnumerator() => items.GetEnumerator();
+	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 	public void Add(TodoItem item)
 	{
-		if (Count >= items.Length) IncreaseArray(items, item);
-		items[Count++] = item;
+		items.Add(item);
 	}
 
 	public void Delete(int index)
 	{
-		if (index < 0 || index >= Count)
-			throw new ArgumentOutOfRangeException("Неверный индекс задачи");
-
-		for (var i = index; i < Count - 1; i++) items[i] = items[i + 1];
-		Count--;
+		items.RemoveAt(index);
 	}
 
 	public void View(bool showIndex, bool showStatus, bool showDate)
@@ -39,7 +30,7 @@ public class TodoList
 		Console.WriteLine(header);
 		Console.WriteLine(new string('-', header.Length));
 
-		for (var i = 0; i < Count; i++)
+		for (var i = 0; i < items.Count; i++)
 		{
 			var line = "";
 			if (showIndex) line += $"{i + 1}".PadRight(6);
@@ -55,15 +46,8 @@ public class TodoList
 
 	public TodoItem GetItem(int index)
 	{
-		if (index < 0 || index >= Count)
+		if (index < 0 || index >= items.Count)
 			throw new ArgumentOutOfRangeException("Неверный индекс задачи");
 		return items[index];
-	}
-
-	private void IncreaseArray(TodoItem[] currentItems, TodoItem newItem)
-	{
-		var newItems = new TodoItem[currentItems.Length * 2];
-		Array.Copy(currentItems, newItems, Count);
-		items = newItems;
 	}
 }
