@@ -2,5 +2,6 @@ namespace TodoList.commands;
 
 public interface ICommand
 {
-	void Execute();
+    void Execute();
+    void Unexecute();
 }
