@@ -2,21 +2,25 @@ namespace TodoList.commands;
 
 public class ViewCommand : ICommand
 {
-	public bool ShowIndex { get; set; }
-	public bool ShowStatus { get; set; }
-	public bool ShowDate { get; set; }
-	public bool ShowAll { get; set; }
-	public TodoList todoList { get; set; }
+    public bool ShowIndex { get; set; }
+    public bool ShowStatus { get; set; }
+    public bool ShowDate { get; set; }
+    public bool ShowAll { get; set; }
 
-	public void Execute()
-	{
-		if (ShowAll)
-		{
-			ShowIndex = true;
-			ShowStatus = true;
-			ShowDate = true;
-		}
+    public void Execute()
+    {
+        if (ShowAll)
+        {
+            ShowIndex = true;
+            ShowStatus = true;
+            ShowDate = true;
+        }
 
-		todoList.View(ShowIndex, ShowStatus, ShowDate);
-	}
+        AppInfo.Todos.View(ShowIndex, ShowStatus, ShowDate);
+    }
+
+    public void Unexecute()
+    {
+        // Команда view не требует отмены
+    }
 }
