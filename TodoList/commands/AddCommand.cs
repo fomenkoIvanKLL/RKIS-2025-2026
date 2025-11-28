@@ -2,62 +2,73 @@ namespace TodoList.commands;
 
 public class AddCommand : ICommand
 {
-	public string[] parts { get; set; }
-	public bool multiline { get; set; }
-	public TodoList todoList { get; set; }
+    public string[] parts { get; set; }
+    public bool multiline { get; set; }
+    public TodoItem AddedItem { get; private set; }
 
-	public void Execute()
-	{
-		if (multiline)
-			AddMultilineTask();
-		else
-		{
-			if (parts.Length < 2)
-			{
-				Console.WriteLine("Ошибка: укажите текст задачи");
-				return;
-			}
+    public void Execute()
+    {
+        if (multiline)
+            AddMultilineTask();
+        else
+        {
+            if (parts.Length < 2)
+            {
+                Console.WriteLine("Ошибка: укажите текст задачи");
+                return;
+            }
 
-			var taskText = string.Join(" ", parts, 1, parts.Length - 1);
-			AddSingleTask(taskText);
-		}
-	}
+            var taskText = string.Join(" ", parts, 1, parts.Length - 1);
+            AddSingleTask(taskText);
+        }
+        
+        AppInfo.UndoStack.Push(this);
+    }
 
-	private void AddSingleTask(string taskText)
-	{
-		if (string.IsNullOrWhiteSpace(taskText))
-		{
-			Console.WriteLine("Ошибка: текст задачи не может быть пустым");
-			return;
-		}
+    private void AddSingleTask(string taskText)
+    {
+        if (string.IsNullOrWhiteSpace(taskText))
+        {
+            Console.WriteLine("Ошибка: текст задачи не может быть пустым");
+            return;
+        }
 
-		var newItem = new TodoItem(taskText);
-		todoList.Add(newItem);
-		Console.WriteLine($"Задача добавлена: {taskText}");
-	}
+        AddedItem = new TodoItem(taskText);
+        AppInfo.Todos.Add(AddedItem);
+        Console.WriteLine($"Задача добавлена: {taskText}");
+    }
 
-	private void AddMultilineTask()
-	{
-		Console.WriteLine("Введите текст задачи (для завершения введите 'end'):");
-		var taskText = "";
-		while (true)
-		{
-			Console.Write("> ");
-			var line = Console.ReadLine();
-			if (line == null)
-				continue;
-			if (line == "end")
-				break;
-			taskText += line + "\n";
-		}
+    private void AddMultilineTask()
+    {
+        Console.WriteLine("Введите текст задачи (для завершения введите 'end'):");
+        var taskText = "";
+        while (true)
+        {
+            Console.Write("> ");
+            var line = Console.ReadLine();
+            if (line == null)
+                continue;
+            if (line == "end")
+                break;
+            taskText += line + "\n";
+        }
 
-		taskText = taskText.TrimEnd('\n');
-		if (string.IsNullOrWhiteSpace(taskText))
-		{
-			Console.WriteLine("Ошибка: текст задачи не может быть пустым");
-			return;
-		}
+        taskText = taskText.TrimEnd('\n');
+        if (string.IsNullOrWhiteSpace(taskText))
+        {
+            Console.WriteLine("Ошибка: текст задачи не может быть пустым");
+            return;
+        }
 
-		AddSingleTask(taskText);
-	}
+        AddSingleTask(taskText);
+    }
+
+    public void Unexecute()
+    {
+        if (AddedItem != null)
+        {
+            AppInfo.Todos.items.Remove(AddedItem);
+            Console.WriteLine($"Отменено добавление задачи: {AddedItem.Text}");
+        }
+    }
 }
