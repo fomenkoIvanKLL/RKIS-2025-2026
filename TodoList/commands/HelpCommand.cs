@@ -24,6 +24,9 @@ public class HelpCommand : ICommand
         Console.WriteLine("  --update-date, -d - показывать дату изменения");
         Console.WriteLine("  --all, -a         - показывать все данные");
         Console.WriteLine("Комбинации флагов: view -is, view --index --status и т.д.");
+        Console.WriteLine();
+        Console.WriteLine("Доступные статусы задач:");
+        Console.WriteLine("  NotStarted, InProgress, Completed, Postponed, Failed");
     }
 
     public void Unexecute()

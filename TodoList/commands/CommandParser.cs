@@ -50,6 +50,8 @@ public class CommandParser
                 {
                     parts = parts
                 };
+            case "undo": return new UndoCommand();
+            case "redo": return new RedoCommand();
             case "exit": return new ExitCommand();
             default: return new UnknownCommand();
         }
