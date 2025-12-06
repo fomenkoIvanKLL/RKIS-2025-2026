@@ -15,7 +15,7 @@ public class HelpCommand : ICommand
         Console.WriteLine("update <num> \"<text>\"       - обновить текст задачи");
         Console.WriteLine("undo                          - отменить последнее действие");
         Console.WriteLine("redo                          - повторить отмененное действие");
-        Console.WriteLine("profile                       - управление профилем пользователя");
+        Console.WriteLine("profile [--out|-o]            - управление профилем (флаг --out для выхода)");
         Console.WriteLine("exit                          - выйти из программы");
         Console.WriteLine();
         Console.WriteLine("Флаги для команды view:");
@@ -27,6 +27,11 @@ public class HelpCommand : ICommand
         Console.WriteLine();
         Console.WriteLine("Доступные статусы задач:");
         Console.WriteLine("  NotStarted, InProgress, Completed, Postponed, Failed");
+        Console.WriteLine();
+        Console.WriteLine("Система многопользовательского режима:");
+        Console.WriteLine("  - Каждый пользователь имеет свой логин и пароль");
+        Console.WriteLine("  - Задачи хранятся отдельно для каждого пользователя");
+        Console.WriteLine("  - Для выхода из текущего профиля используйте 'profile --out'");
     }
 
     public void Unexecute()
