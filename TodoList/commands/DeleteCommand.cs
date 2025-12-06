@@ -2,7 +2,7 @@ namespace TodoList.commands;
 
 public class DeleteCommand : ICommand
 {
-    public string[] parts { get; set; }
+    public required string[] parts { get; set; }
     public TodoItem DeletedItem { get; private set; }
     public int DeletedIndex { get; private set; }
     public Guid UserId { get; private set; }

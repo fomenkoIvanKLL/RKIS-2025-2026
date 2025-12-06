@@ -2,7 +2,7 @@ namespace TodoList.commands;
 
 public class AddCommand : ICommand
 {
-    public string[] parts { get; set; }
+    public required string[] parts { get; set; }
     public bool multiline { get; set; }
     public TodoItem AddedItem { get; private set; }
     public Guid UserId { get; private set; }

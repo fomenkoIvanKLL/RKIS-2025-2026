@@ -2,7 +2,7 @@ namespace TodoList.commands;
 
 public class UpdateCommand : ICommand
 {
-    public string[] parts { get; set; }
+    public required string[] parts { get; set; }
     public TodoItem UpdatedItem { get; private set; }
     public string OldText { get; private set; }
     public string NewText { get; private set; }

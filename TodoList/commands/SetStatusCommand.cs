@@ -2,7 +2,7 @@ namespace TodoList.commands;
 
 public class SetStatusCommand : ICommand
 {
-    public string[] parts { get; set; }
+    public required string[] parts { get; set; }
     public TodoItem StatusItem { get; private set; }
     public TodoStatus OldStatus { get; private set; }
     public TodoStatus NewStatus { get; private set; }

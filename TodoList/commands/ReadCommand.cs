@@ -2,7 +2,7 @@ namespace TodoList.commands;
 
 public class ReadCommand : ICommand
 {
-    public string[] parts { get; set; }
+    public required string[] parts { get; set; }
 
     public void Execute()
     {
