@@ -9,6 +9,12 @@ public class ViewCommand : ICommand
 
     public void Execute()
     {
+        if (!AppInfo.CurrentProfileId.HasValue)
+        {
+            Console.WriteLine("Ошибка: нет активного профиля");
+            return;
+        }
+        
         if (ShowAll)
         {
             ShowIndex = true;
@@ -16,7 +22,8 @@ public class ViewCommand : ICommand
             ShowDate = true;
         }
 
-        AppInfo.Todos.View(ShowIndex, ShowStatus, ShowDate);
+        var todoList = AppInfo.GetCurrentTodoList();
+        todoList.View(ShowIndex, ShowStatus, ShowDate);
     }
 
     public void Unexecute()
