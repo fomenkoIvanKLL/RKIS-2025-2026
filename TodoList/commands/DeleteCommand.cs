@@ -5,9 +5,18 @@ public class DeleteCommand : ICommand
     public string[] parts { get; set; }
     public TodoItem DeletedItem { get; private set; }
     public int DeletedIndex { get; private set; }
+    public Guid UserId { get; private set; }
 
     public void Execute()
     {
+        if (!AppInfo.CurrentProfileId.HasValue)
+        {
+            Console.WriteLine("Ошибка: нет активного профиля");
+            return;
+        }
+        
+        UserId = AppInfo.CurrentProfileId.Value;
+        
         if (parts.Length < 2 || !int.TryParse(parts[1], out var taskNumber))
         {
             Console.WriteLine("Ошибка: укажите номер задачи");
@@ -17,11 +26,13 @@ public class DeleteCommand : ICommand
         var index = taskNumber - 1;
         try
         {
-            DeletedItem = AppInfo.Todos.GetItem(index);
+            var todoList = AppInfo.GetCurrentTodoList();
+            DeletedItem = todoList.GetItem(index);
             DeletedIndex = index;
-            AppInfo.Todos.Delete(index);
+            todoList.Delete(index);
             Console.WriteLine($"Задача удалена: {DeletedItem.Text}");
             AppInfo.UndoStack.Push(this);
+            FileManager.SaveTodos(UserId, todoList);
         }
         catch (ArgumentOutOfRangeException)
         {
@@ -31,10 +42,11 @@ public class DeleteCommand : ICommand
 
     public void Unexecute()
     {
-        if (DeletedItem != null)
+        if (DeletedItem != null && AppInfo.TodosByUser.ContainsKey(UserId))
         {
-            AppInfo.Todos.items.Insert(DeletedIndex, DeletedItem);
+            AppInfo.TodosByUser[UserId].items.Insert(DeletedIndex, DeletedItem);
             Console.WriteLine($"Отменено удаление задачи: {DeletedItem.Text}");
+            FileManager.SaveTodos(UserId, AppInfo.TodosByUser[UserId]);
         }
     }
 }
