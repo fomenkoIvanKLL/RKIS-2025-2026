@@ -6,6 +6,12 @@ public class ReadCommand : ICommand
 
     public void Execute()
     {
+        if (!AppInfo.CurrentProfileId.HasValue)
+        {
+            Console.WriteLine("Ошибка: нет активного профиля");
+            return;
+        }
+        
         if (parts.Length < 2 || !int.TryParse(parts[1], out var taskNumber))
         {
             Console.WriteLine("Ошибка: укажите номер задачи");
@@ -15,7 +21,8 @@ public class ReadCommand : ICommand
         var index = taskNumber - 1;
         try
         {
-            var item = AppInfo.Todos.GetItem(index);
+            var todoList = AppInfo.GetCurrentTodoList();
+            var item = todoList.GetItem(index);
             Console.WriteLine($"Задача {taskNumber}:");
             Console.WriteLine(item.GetFullInfo());
         }
