@@ -5,9 +5,18 @@ public class AddCommand : ICommand
     public string[] parts { get; set; }
     public bool multiline { get; set; }
     public TodoItem AddedItem { get; private set; }
+    public Guid UserId { get; private set; }
 
     public void Execute()
     {
+        if (!AppInfo.CurrentProfileId.HasValue)
+        {
+            Console.WriteLine("Ошибка: нет активного профиля");
+            return;
+        }
+        
+        UserId = AppInfo.CurrentProfileId.Value;
+        
         if (multiline)
             AddMultilineTask();
         else
@@ -23,6 +32,7 @@ public class AddCommand : ICommand
         }
         
         AppInfo.UndoStack.Push(this);
+        FileManager.SaveTodos(UserId, AppInfo.GetCurrentTodoList());
     }
 
     private void AddSingleTask(string taskText)
@@ -34,7 +44,7 @@ public class AddCommand : ICommand
         }
 
         AddedItem = new TodoItem(taskText);
-        AppInfo.Todos.Add(AddedItem);
+        AppInfo.GetCurrentTodoList().Add(AddedItem);
         Console.WriteLine($"Задача добавлена: {taskText}");
     }
 
@@ -65,10 +75,11 @@ public class AddCommand : ICommand
 
     public void Unexecute()
     {
-        if (AddedItem != null)
+        if (AddedItem != null && AppInfo.TodosByUser.ContainsKey(UserId))
         {
-            AppInfo.Todos.items.Remove(AddedItem);
+            AppInfo.TodosByUser[UserId].items.Remove(AddedItem);
             Console.WriteLine($"Отменено добавление задачи: {AddedItem.Text}");
+            FileManager.SaveTodos(UserId, AppInfo.TodosByUser[UserId]);
         }
     }
 }
