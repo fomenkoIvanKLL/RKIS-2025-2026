@@ -4,6 +4,12 @@ public class RedoCommand : ICommand
 {
     public void Execute()
     {
+        if (!AppInfo.CurrentProfileId.HasValue)
+        {
+            Console.WriteLine("Ошибка: нет активного профиля");
+            return;
+        }
+        
         if (AppInfo.RedoStack.Count == 0)
         {
             Console.WriteLine("Нет действий для повторения");
@@ -13,7 +19,9 @@ public class RedoCommand : ICommand
         var command = AppInfo.RedoStack.Pop();
         command.Execute();
         AppInfo.UndoStack.Push(command);
-        FileManager.SaveTodos(AppInfo.Todos);
+        
+        if (AppInfo.CurrentProfileId.HasValue)
+            FileManager.SaveTodos(AppInfo.CurrentProfileId.Value, AppInfo.GetCurrentTodoList());
     }
 
     public void Unexecute()

@@ -4,6 +4,12 @@ public class UndoCommand : ICommand
 {
     public void Execute()
     {
+        if (!AppInfo.CurrentProfileId.HasValue)
+        {
+            Console.WriteLine("Ошибка: нет активного профиля");
+            return;
+        }
+        
         if (AppInfo.UndoStack.Count == 0)
         {
             Console.WriteLine("Нет действий для отмены");
@@ -13,7 +19,9 @@ public class UndoCommand : ICommand
         var command = AppInfo.UndoStack.Pop();
         command.Unexecute();
         AppInfo.RedoStack.Push(command);
-        FileManager.SaveTodos(AppInfo.Todos);
+        
+        if (AppInfo.CurrentProfileId.HasValue)
+            FileManager.SaveTodos(AppInfo.CurrentProfileId.Value, AppInfo.GetCurrentTodoList());
     }
 
     public void Unexecute()
