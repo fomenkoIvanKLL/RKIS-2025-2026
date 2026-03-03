@@ -6,7 +6,7 @@ namespace TodoList;
 
 public class TodoList : IEnumerable<TodoItem>
 {
-    public List<TodoItem> items = [];
+    public List<TodoItem> items = new List<TodoItem>();
 
     // События
     public event Action<TodoItem>? OnTodoAdded;

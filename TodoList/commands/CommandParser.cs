@@ -58,12 +58,13 @@ public static class CommandParser
     private static ICommand ParseView(string args)
     {
         var flags = ParseFlags(args);
+        var showAll = flags.Contains("--all") || flags.Contains("-a");
         return new ViewCommand
         {
-            ShowIndex = flags.Contains("--index") || flags.Contains("-i"),
-            ShowStatus = flags.Contains("--status") || flags.Contains("-s"),
-            ShowDate = flags.Contains("--update-date") || flags.Contains("-d"),
-            ShowAll = flags.Contains("--all") || flags.Contains("-a")
+            ShowIndex = showAll || flags.Contains("--index") || flags.Contains("-i"),
+            ShowStatus = showAll || flags.Contains("--status") || flags.Contains("-s"),
+            ShowDate = showAll || flags.Contains("--update-date") || flags.Contains("-d"),
+            ShowAll = showAll
         };
     }
 
@@ -109,7 +110,7 @@ public static class CommandParser
         }
         return new ProfileCommand { parts = fullParts.ToArray() };
     }
-    
+
     private static ICommand ParseUndo(string args) => new UndoCommand();
     private static ICommand ParseRedo(string args) => new RedoCommand();
     private static ICommand ParseExit(string args) => new ExitCommand();
@@ -196,7 +197,16 @@ public static class CommandParser
 
     private static ICommand ParseLoad(string args)
     {
-        var parts = args.Split(' ');
+        var parts = args.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+            throw new InvalidArgumentException("Команда load требует два аргумента: <количество> <размер>");
+
+        if (!int.TryParse(parts[0], out var count) || count <= 0)
+            throw new InvalidArgumentException("Количество загрузок должно быть положительным целым числом.");
+
+        if (!int.TryParse(parts[1], out var size) || size <= 0)
+            throw new InvalidArgumentException("Размер загрузки должен быть положительным целым числом.");
+
         var fullParts = new List<string> { "load" };
         fullParts.AddRange(parts);
         return new LoadCommand { parts = fullParts.ToArray() };

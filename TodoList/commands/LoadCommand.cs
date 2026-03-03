@@ -11,6 +11,7 @@ public class LoadCommand : ICommand
 
     public void Execute()
     {
+        // Аргументы уже проверены в парсере, но можно оставить дополнительную проверку
         if (parts.Length < 3)
             throw new InvalidArgumentException("Укажите количество загрузок и размер. Использование: load <количество> <размер>");
 
