@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
 namespace TodoList;
 
 public class FileManager
@@ -91,18 +96,66 @@ public class FileManager
             if (string.IsNullOrWhiteSpace(line))
                 continue;
                 
-            var parts = line.Split(';');
+            // Ручной парсинг CSV с учётом кавычек
+            var fields = ParseCsvLine(line);
+            if (fields.Length < 4)
+                continue; // игнорируем повреждённые строки
 
-            var text = UnescapeCsv(parts[1]);
-            var status = Enum.Parse<TodoStatus>(parts[2]);
-            var lastUpdate = DateTime.Parse(parts[3]);
+            // fields[0] - индекс (не используется, но можно проверить)
+            var text = UnescapeCsv(fields[1]);
+            if (!Enum.TryParse<TodoStatus>(fields[2], true, out var status))
+                continue; // если статус не распознан, пропускаем
+            if (!DateTime.TryParse(fields[3], out var lastUpdate))
+                continue;
 
             list.Add(new TodoItem(text, status, lastUpdate));
         }
 
         return list;
-        
-        string UnescapeCsv(string text)
-            => text.Trim('"').Replace("\\n", "\n").Replace("\"\"", "\"");
+    }
+
+    // Разделение CSV-строки с поддержкой кавычек
+    private static string[] ParseCsvLine(string line)
+    {
+        var result = new List<string>();
+        var current = new StringBuilder();
+        bool inQuotes = false;
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    // Экранированная кавычка внутри поля
+                    current.Append('"');
+                    i++; // пропускаем следующую кавычку
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == ';' && !inQuotes)
+            {
+                result.Add(current.ToString());
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+        result.Add(current.ToString()); // последнее поле
+
+        return result.ToArray();
+    }
+    
+    private static string UnescapeCsv(string text)
+    {
+        if (text.Length >= 2 && text[0] == '"' && text[text.Length - 1] == '"')
+            text = text.Substring(1, text.Length - 2);
+        return text.Replace("\\n", "\n").Replace("\"\"", "\"");
     }
 }
