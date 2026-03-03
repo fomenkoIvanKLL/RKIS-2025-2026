@@ -24,6 +24,7 @@ public static class CommandParser
         _commandHandlers["redo"] = ParseRedo;
         _commandHandlers["exit"] = ParseExit;
         _commandHandlers["search"] = ParseSearch;
+        _commandHandlers["load"] = ParseLoad;
     }
 
     public static ICommand Parse(string input)
@@ -120,7 +121,7 @@ public static class CommandParser
         {
             var token = tokens[i];
             if (!token.StartsWith("--"))
-                continue; // пропускаем значения, они будут обработаны как аргументы флагов
+                continue;
 
             if (!recognizedFlags.Contains(token))
                 throw new InvalidArgumentException($"Неизвестный флаг '{token}' для команды search.");
@@ -188,6 +189,14 @@ public static class CommandParser
         }
 
         return cmd;
+    }
+
+    private static ICommand ParseLoad(string args)
+    {
+        var parts = args.Split(' ');
+        var fullParts = new List<string> { "load" };
+        fullParts.AddRange(parts);
+        return new LoadCommand { parts = fullParts.ToArray() };
     }
 
     private static List<string> ParseArguments(string input)
