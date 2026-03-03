@@ -13,20 +13,25 @@ public class AddCommand : ICommand
     {
         if (!AppInfo.CurrentProfileId.HasValue)
             throw new AuthenticationException("Необходимо войти в профиль для добавления задач.");
-        
+    
         UserId = AppInfo.CurrentProfileId.Value;
-        
+    
         if (multiline)
+        {
             AddMultilineTask();
+        }
         else
         {
             if (parts.Length < 2)
                 throw new InvalidArgumentException("Укажите текст задачи. Использование: add <текст>");
 
             var taskText = string.Join(" ", parts, 1, parts.Length - 1);
+            if (string.IsNullOrWhiteSpace(taskText))
+                throw new InvalidArgumentException("Укажите текст задачи. Использование: add <текст>");
+        
             AddSingleTask(taskText);
         }
-        
+    
         AppInfo.UndoStack.Push(this);
     }
 
