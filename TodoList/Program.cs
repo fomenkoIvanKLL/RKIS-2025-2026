@@ -10,7 +10,7 @@ internal class Program
         try
         {
             Console.WriteLine("=== Todo List Application ===");
-            Console.WriteLine("Практическую работу 2 (2 семестр) сделали: Фоменко и Мартиросьян");
+            Console.WriteLine("Практическую работу 1 (ТИС, 2 семестр) сделали: Фоменко и Мартиросьян");
             
             FileManager.EnsureAllData();
             AppInfo.Profiles = FileManager.LoadProfiles();

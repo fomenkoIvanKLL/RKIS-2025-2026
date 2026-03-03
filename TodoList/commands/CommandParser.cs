@@ -101,12 +101,15 @@ public static class CommandParser
 
     private static ICommand ParseProfile(string args)
     {
-        var parts = args.Split(' ');
         var fullParts = new List<string> { "profile" };
-        fullParts.AddRange(parts);
+        if (!string.IsNullOrWhiteSpace(args))
+        {
+            var parts = args.Split(' ');
+            fullParts.AddRange(parts);
+        }
         return new ProfileCommand { parts = fullParts.ToArray() };
     }
-
+    
     private static ICommand ParseUndo(string args) => new UndoCommand();
     private static ICommand ParseRedo(string args) => new RedoCommand();
     private static ICommand ParseExit(string args) => new ExitCommand();
