@@ -17,6 +17,7 @@ public class HelpCommand : ICommand
         Console.WriteLine("redo                          - повторить отмененное действие");
         Console.WriteLine("profile [--out|-o]            - управление профилем (флаг --out для выхода)");
         Console.WriteLine("search [флаги]                - поиск задач по критериям");
+        Console.WriteLine("load <количество> <размер>    - имитация параллельных загрузок с прогресс-барами");
         Console.WriteLine("exit                          - выйти из программы");
         Console.WriteLine();
         Console.WriteLine("Флаги для команды search:");
@@ -35,6 +36,7 @@ public class HelpCommand : ICommand
         Console.WriteLine("  search --starts-with \"fix\" --sort date --desc");
         Console.WriteLine("  search --from 2024-01-01 --to 2024-02-01");
         Console.WriteLine("  search --status in-progress --top 5");
+        Console.WriteLine("  load 3 100                   - запустить 3 загрузки размером 100 единиц каждая");
         Console.WriteLine();
         Console.WriteLine("Флаги для команды view:");
         Console.WriteLine("  --index, -i       - показывать индекс задачи");
@@ -52,8 +54,5 @@ public class HelpCommand : ICommand
         Console.WriteLine("  - Для выхода из текущего профиля используйте 'profile --out'");
     }
 
-    public void Unexecute()
-    {
-        // Команда help не требует отмены
-    }
+    public void Unexecute() { }
 }
