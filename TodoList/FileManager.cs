@@ -1,120 +1,182 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace TodoList;
 
-public class FileManager
+public class FileManager : IDataStorage
 {
-    public const string dataDirPath = "data";
-    public static string profilesPath = Path.Combine(dataDirPath, "profiles.csv");
-    
-    public static void EnsureAllData()
+    private readonly string _dataDirPath;
+    private readonly byte[] _key;
+    private readonly byte[] _iv;
+
+    public FileManager(string dataDirPath, byte[] key, byte[] iv)
     {
-        EnsureDataDirectory(dataDirPath);
-        if (!File.Exists(profilesPath)) 
-            File.WriteAllText(profilesPath, "");
+        _dataDirPath = dataDirPath;
+        _key = key;
+        _iv = iv;
+        EnsureDataDirectory();
     }
-    
-    public static void EnsureDataDirectory(string dirPath)
+
+    private void EnsureDataDirectory()
     {
-        if (!Directory.Exists(dirPath)) Directory.CreateDirectory(dirPath);
+        if (!Directory.Exists(_dataDirPath))
+            Directory.CreateDirectory(_dataDirPath);
     }
-    
-    public static void SaveProfiles(List<Profile> profiles)
+
+    private string GetProfilesFilePath() => Path.Combine(_dataDirPath, "profiles.dat");
+    private string GetTodoFilePath(Guid userId) => Path.Combine(_dataDirPath, $"todos_{userId}.dat");
+
+    public void SaveProfiles(IEnumerable<Profile> profiles)
     {
-        using var writer = new StreamWriter(profilesPath, false);
-        foreach (var profile in profiles)
+        var filePath = GetProfilesFilePath();
+        using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+        using (var bufferedStream = new BufferedStream(fileStream))
+        using (var aes = Aes.Create())
         {
-            writer.WriteLine($"{profile.Id};{profile.Login};{profile.Password};{profile.FirstName};{profile.LastName};{profile.BirthYear}");
+            aes.Key = _key;
+            aes.IV = _iv;
+            using (var cryptoStream = new CryptoStream(bufferedStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+            using (var writer = new StreamWriter(cryptoStream, Encoding.UTF8))
+            {
+                foreach (var profile in profiles)
+                {
+                    writer.WriteLine($"{profile.Id};{profile.Login};{profile.Password};{profile.FirstName};{profile.LastName};{profile.BirthYear}");
+                }
+            }
         }
     }
-    
-    public static List<Profile> LoadProfiles()
+
+    public IEnumerable<Profile> LoadProfiles()
     {
+        var filePath = GetProfilesFilePath();
+        if (!File.Exists(filePath))
+            return new List<Profile>();
+
         var profiles = new List<Profile>();
-        
-        if (!File.Exists(profilesPath))
-            return profiles;
-            
-        var lines = File.ReadAllLines(profilesPath);
-        foreach (var line in lines)
+        try
         {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-                
-            var parts = line.Split(';');
-            if (parts.Length != 6)
-                continue;
-                
-            var id = Guid.Parse(parts[0]);
-            var login = parts[1];
-            var password = parts[2];
-            var firstName = parts[3];
-            var lastName = parts[4];
-            var birthYear = int.Parse(parts[5]);
-            
-            profiles.Add(new Profile(id, login, password, firstName, lastName, birthYear));
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (var bufferedStream = new BufferedStream(fileStream))
+            using (var aes = Aes.Create())
+            {
+                aes.Key = _key;
+                aes.IV = _iv;
+                using (var cryptoStream = new CryptoStream(bufferedStream, aes.CreateDecryptor(), CryptoStreamMode.Read))
+                using (var reader = new StreamReader(cryptoStream, Encoding.UTF8))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+                        var parts = line.Split(';');
+                        if (parts.Length != 6)
+                            continue;
+                        var id = Guid.Parse(parts[0]);
+                        var login = parts[1];
+                        var password = parts[2];
+                        var firstName = parts[3];
+                        var lastName = parts[4];
+                        var birthYear = int.Parse(parts[5]);
+                        profiles.Add(new Profile(id, login, password, firstName, lastName, birthYear));
+                    }
+                }
+            }
         }
-        
+        catch (CryptographicException ex)
+        {
+            throw new InvalidOperationException("Ошибка расшифровки файла профилей. Возможно, данные повреждены.", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new InvalidOperationException("Ошибка доступа к файлу профилей.", ex);
+        }
         return profiles;
     }
-    
-    public static string GetTodoFilePath(Guid userId)
-    {
-        return Path.Combine(dataDirPath, $"todos_{userId}.csv");
-    }
-    
-    public static void SaveTodos(Guid userId, TodoList todoList)
-    {
-        var todoPath = GetTodoFilePath(userId);
-        using var writer = new StreamWriter(todoPath, false);
 
-        for (var i = 0; i < todoList.items.Count; i++)
+    public void SaveTodos(Guid userId, IEnumerable<TodoItem> todos)
+    {
+        var filePath = GetTodoFilePath(userId);
+        using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+        using (var bufferedStream = new BufferedStream(fileStream))
+        using (var aes = Aes.Create())
         {
-            var item = todoList.items[i];
-            var text = EscapeCsv(item.Text);
-            writer.WriteLine($"{i};{text};{item.Status};{item.LastUpdate:O}");
+            aes.Key = _key;
+            aes.IV = _iv;
+            using (var cryptoStream = new CryptoStream(bufferedStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+            using (var writer = new StreamWriter(cryptoStream, Encoding.UTF8))
+            {
+                int index = 0;
+                foreach (var item in todos)
+                {
+                    var text = EscapeCsv(item.Text);
+                    writer.WriteLine($"{index};{text};{item.Status};{item.LastUpdate:O}");
+                    index++;
+                }
+            }
         }
-        
-        string EscapeCsv(string text)
-            => "\"" + text.Replace("\"", "\"\"").Replace("\n", "\\n") + "\"";
     }
-    
-    public static TodoList LoadTodos(Guid userId)
+
+    public IEnumerable<TodoItem> LoadTodos(Guid userId)
     {
-        var todoPath = GetTodoFilePath(userId);
-        var list = new TodoList();
+        var filePath = GetTodoFilePath(userId);
+        if (!File.Exists(filePath))
+            return new List<TodoItem>();
 
-        if (!File.Exists(todoPath))
-            return list;
-
-        var lines = File.ReadAllLines(todoPath);
-        foreach (var line in lines)
+        var list = new List<TodoItem>();
+        try
         {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-                
-            // Ручной парсинг CSV с учётом кавычек
-            var fields = ParseCsvLine(line);
-            if (fields.Length < 4)
-                continue; // игнорируем повреждённые строки
-
-            // fields[0] - индекс (не используется, но можно проверить)
-            var text = UnescapeCsv(fields[1]);
-            if (!Enum.TryParse<TodoStatus>(fields[2], true, out var status))
-                continue; // если статус не распознан, пропускаем
-            if (!DateTime.TryParse(fields[3], out var lastUpdate))
-                continue;
-
-            list.Add(new TodoItem(text, status, lastUpdate));
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (var bufferedStream = new BufferedStream(fileStream))
+            using (var aes = Aes.Create())
+            {
+                aes.Key = _key;
+                aes.IV = _iv;
+                using (var cryptoStream = new CryptoStream(bufferedStream, aes.CreateDecryptor(), CryptoStreamMode.Read))
+                using (var reader = new StreamReader(cryptoStream, Encoding.UTF8))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+                        var fields = ParseCsvLine(line);
+                        if (fields.Length < 4)
+                            continue;
+                        var text = UnescapeCsv(fields[1]);
+                        if (!Enum.TryParse<TodoStatus>(fields[2], true, out var status))
+                            continue;
+                        if (!DateTime.TryParse(fields[3], out var lastUpdate))
+                            continue;
+                        list.Add(new TodoItem(text, status, lastUpdate));
+                    }
+                }
+            }
         }
-
+        catch (CryptographicException ex)
+        {
+            throw new InvalidOperationException($"Ошибка расшифровки файла задач пользователя {userId}.", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new InvalidOperationException($"Ошибка доступа к файлу задач пользователя {userId}.", ex);
+        }
         return list;
     }
 
-    // Разделение CSV-строки с поддержкой кавычек
+    private static string EscapeCsv(string text)
+        => "\"" + text.Replace("\"", "\"\"").Replace("\n", "\\n") + "\"";
+
+    private static string UnescapeCsv(string text)
+    {
+        if (text.Length >= 2 && text[0] == '"' && text[text.Length - 1] == '"')
+            text = text.Substring(1, text.Length - 2);
+        return text.Replace("\\n", "\n").Replace("\"\"", "\"");
+    }
+
     private static string[] ParseCsvLine(string line)
     {
         var result = new List<string>();
@@ -128,9 +190,8 @@ public class FileManager
             {
                 if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
                 {
-                    // Экранированная кавычка внутри поля
                     current.Append('"');
-                    i++; // пропускаем следующую кавычку
+                    i++;
                 }
                 else
                 {
@@ -147,15 +208,7 @@ public class FileManager
                 current.Append(c);
             }
         }
-        result.Add(current.ToString()); // последнее поле
-
+        result.Add(current.ToString());
         return result.ToArray();
-    }
-    
-    private static string UnescapeCsv(string text)
-    {
-        if (text.Length >= 2 && text[0] == '"' && text[text.Length - 1] == '"')
-            text = text.Substring(1, text.Length - 2);
-        return text.Replace("\\n", "\n").Replace("\"\"", "\"");
     }
 }
