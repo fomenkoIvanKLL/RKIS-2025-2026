@@ -48,14 +48,15 @@ public class ProfileCommand : ICommand
     {
         isLogoutCommand = true;
         Console.WriteLine("Выход из профиля...");
-        
-        FileManager.SaveProfiles(AppInfo.Profiles);
-        
+
+        // Сохраняем профили через DataStorage
+        AppInfo.DataStorage?.SaveProfiles(AppInfo.Profiles);
+
         AppInfo.UndoStack.Clear();
         AppInfo.RedoStack.Clear();
-        
+
         AppInfo.CurrentProfileId = null;
-        
+
         Console.WriteLine("Вы вышли из профиля. Перезапустите программу для входа в другой профиль.");
         Environment.Exit(0);
     }
