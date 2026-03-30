@@ -25,6 +25,7 @@ public static class CommandParser
         _commandHandlers["exit"] = ParseExit;
         _commandHandlers["search"] = ParseSearch;
         _commandHandlers["load"] = ParseLoad;
+        _commandHandlers["sync"] = ParseSync;
     }
 
     public static ICommand Parse(string input)
@@ -210,6 +211,25 @@ public static class CommandParser
         var fullParts = new List<string> { "load" };
         fullParts.AddRange(parts);
         return new LoadCommand { parts = fullParts.ToArray() };
+    }
+
+    private static ICommand ParseSync(string args)
+    {
+        var flags = ParseFlags(args);
+        var isPull = flags.Contains("--pull");
+        var isPush = flags.Contains("--push");
+
+        if (isPull && isPush)
+            throw new InvalidArgumentException("Нельзя использовать одновременно --pull и --push. Выберите один флаг.");
+
+        if (!isPull && !isPush)
+            throw new InvalidArgumentException("Укажите флаг --pull или --push. Использование: sync --pull | sync --push");
+
+        return new SyncCommand
+        {
+            IsPull = isPull,
+            IsPush = isPush
+        };
     }
 
     private static List<string> ParseArguments(string input)
