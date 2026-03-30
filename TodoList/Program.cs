@@ -20,7 +20,7 @@ internal class Program
             byte[] key = Encoding.UTF8.GetBytes("12345678901234567890123456789012");
             byte[] iv = Encoding.UTF8.GetBytes("1234567890123456");
 
-            _dataStorage = new FileManager("data", key, iv);
+            _dataStorage = new ApiDataStorage("http://localhost:5000", key, iv);
             AppInfo.DataStorage = _dataStorage; // сохраняем ссылку для команд
 
             AppInfo.Profiles = _dataStorage.LoadProfiles().ToList();
