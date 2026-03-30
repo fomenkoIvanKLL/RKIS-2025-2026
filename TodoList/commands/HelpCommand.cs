@@ -52,6 +52,9 @@ public class HelpCommand : ICommand
         Console.WriteLine("  - Каждый пользователь имеет свой логин и пароль");
         Console.WriteLine("  - Задачи хранятся отдельно для каждого пользователя");
         Console.WriteLine("  - Для выхода из текущего профиля используйте 'profile --out'");
+        Console.WriteLine("sync --pull | --push - синхронизация с сервером");
+        Console.WriteLine("  --pull - получить данные с сервера");
+        Console.WriteLine("  --push - отправить данные на сервер");
     }
 
     public void Unexecute() { }
