@@ -1,5 +1,4 @@
 using System.Windows;
-using System.Windows.Input;
 using TodoApp.Desktop.ViewModels;
 
 namespace TodoApp.Desktop.Views;
@@ -16,6 +15,7 @@ public partial class LoginWindow : Window
             if (success && profile != null)
             {
                 var mainWindow = new MainWindow(profile);
+                Application.Current.MainWindow = mainWindow;
                 mainWindow.Show();
                 Close();
             }
@@ -25,7 +25,6 @@ public partial class LoginWindow : Window
                 registerWindow.ShowDialog();
             }
         };
-        // Привязка пароля
         PasswordBox.PasswordChanged += (s, e) => vm.Password = PasswordBox.Password;
     }
 }

@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using TodoApp.Data;
+using TodoApp.Models;
 
 namespace TodoApp.Desktop.ViewModels;
 

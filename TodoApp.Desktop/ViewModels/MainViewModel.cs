@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using TodoApp.Data;
 using TodoApp.Models;
@@ -61,17 +62,17 @@ public class MainViewModel : ViewModelBase
     {
         var addVM = new AddTaskViewModel(_currentProfile.Id);
         var addWindow = new Views.AddTaskWindow { DataContext = addVM };
-        if (addWindow.ShowDialog() == true)
-            LoadTasks();
+        addVM.CloseRequest += (saved) => { if (saved) LoadTasks(); };
+        addWindow.ShowDialog();
     }
 
     private void EditTask()
     {
         if (SelectedTask == null) return;
         var editVM = new EditTaskViewModel(SelectedTask);
-        var editWindow = new Views.EditTaskWindow { DataContext = editVM };
-        if (editWindow.ShowDialog() == true)
-            LoadTasks();
+        var editWindow = new Views.EditTaskWindow(SelectedTask); // передаём задачу в конструктор окна
+        editWindow.ShowDialog();
+        LoadTasks();
     }
 
     private void DeleteTask()
