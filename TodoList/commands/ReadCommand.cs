@@ -1,4 +1,5 @@
 using TodoList.Exceptions;
+using TodoList.Services;
 
 namespace TodoList.commands;
 
@@ -9,21 +10,19 @@ public class ReadCommand : ICommand
     public void Execute()
     {
         if (!AppInfo.CurrentProfileId.HasValue)
-            throw new AuthenticationException("Необходимо войти в профиль для просмотра задач.");
-        
+            throw new AuthenticationException("Необходимо войти в профиль для чтения задачи.");
+
         if (parts.Length < 2)
             throw new InvalidArgumentException("Укажите номер задачи. Использование: read <номер>");
 
-        if (!int.TryParse(parts[1], out var taskNumber))
-            throw new InvalidArgumentException($"Некорректный номер задачи: '{parts[1]}'. Ожидается целое число.");
+        if (!int.TryParse(parts[1], out var taskNumber) || taskNumber <= 0)
+            throw new InvalidArgumentException($"Некорректный номер задачи: '{parts[1]}'.");
 
-        var index = taskNumber - 1;
         var todoList = AppInfo.GetCurrentTodoList();
-
-        if (index < 0 || index >= todoList.items.Count)
+        if (taskNumber > todoList.items.Count)
             throw new TaskNotFoundException($"Задача с номером {taskNumber} не найдена.");
 
-        var item = todoList.GetItem(index);
+        var item = todoList.items[taskNumber - 1];
         Console.WriteLine($"Задача {taskNumber}:");
         Console.WriteLine(item.GetFullInfo());
     }

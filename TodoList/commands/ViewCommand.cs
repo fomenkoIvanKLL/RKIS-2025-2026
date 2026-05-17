@@ -1,3 +1,5 @@
+using TodoList.Exceptions;
+
 namespace TodoList.commands;
 
 public class ViewCommand : ICommand
@@ -10,11 +12,8 @@ public class ViewCommand : ICommand
     public void Execute()
     {
         if (!AppInfo.CurrentProfileId.HasValue)
-        {
-            Console.WriteLine("Ошибка: нет активного профиля");
-            return;
-        }
-        
+            throw new AuthenticationException("Необходимо войти в профиль для просмотра задач.");
+
         if (ShowAll)
         {
             ShowIndex = true;
@@ -26,8 +25,5 @@ public class ViewCommand : ICommand
         todoList.View(ShowIndex, ShowStatus, ShowDate);
     }
 
-    public void Unexecute()
-    {
-        // Команда view не требует отмены
-    }
+    public void Unexecute() { }
 }

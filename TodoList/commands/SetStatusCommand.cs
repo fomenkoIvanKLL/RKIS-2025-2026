@@ -1,11 +1,12 @@
 using TodoList.Exceptions;
+using TodoList.Services;
 
 namespace TodoList.commands;
 
 public class SetStatusCommand : ICommand
 {
     public required string[] parts { get; set; }
-    public TodoItem? StatusItem { get; private set; }
+    public int UpdatedId { get; private set; }
     public TodoStatus OldStatus { get; private set; }
     public TodoStatus NewStatus { get; private set; }
     public Guid UserId { get; private set; }
@@ -13,42 +14,48 @@ public class SetStatusCommand : ICommand
     public void Execute()
     {
         if (!AppInfo.CurrentProfileId.HasValue)
-            throw new AuthenticationException("Необходимо войти в профиль для изменения статуса задач.");
-        
+            throw new AuthenticationException("Необходимо войти в профиль для изменения статуса.");
+
         UserId = AppInfo.CurrentProfileId.Value;
-        
+
         if (parts.Length < 3)
             throw new InvalidArgumentException("Укажите номер задачи и новый статус. Использование: setstatus <номер> <статус>");
 
-        if (!int.TryParse(parts[1], out var taskNumber))
-            throw new InvalidArgumentException($"Некорректный номер задачи: '{parts[1]}'. Ожидается целое число.");
+        if (!int.TryParse(parts[1], out var taskNumber) || taskNumber <= 0)
+            throw new InvalidArgumentException($"Некорректный номер задачи: '{parts[1]}'.");
 
-        var index = taskNumber - 1;
         var todoList = AppInfo.GetCurrentTodoList();
-
-        if (index < 0 || index >= todoList.items.Count)
+        if (taskNumber > todoList.items.Count)
             throw new TaskNotFoundException($"Задача с номером {taskNumber} не найдена.");
 
-        StatusItem = todoList.GetItem(index);
-        OldStatus = StatusItem.Status;
+        var item = todoList.items[taskNumber - 1];
+        UpdatedId = item.Id;
+        OldStatus = item.Status;
 
         if (!Enum.TryParse<TodoStatus>(parts[2], true, out var newStatus))
             throw new InvalidArgumentException($"Неверный статус '{parts[2]}'. Допустимые значения: {string.Join(", ", Enum.GetNames<TodoStatus>())}.");
 
         NewStatus = newStatus;
-        StatusItem.SetStatus(NewStatus);
-        Console.WriteLine($"Поставлен новый статус({NewStatus}) для задачи '{StatusItem.Text}'");
-        todoList.NotifyStatusChanged(StatusItem);
+        item.SetStatus(NewStatus);
+        AppInfo.TodoRepo.Update(item);
+        Console.WriteLine($"Поставлен новый статус ({NewStatus}) для задачи '{item.Text}'");
         AppInfo.UndoStack.Push(this);
     }
 
     public void Unexecute()
     {
-        if (StatusItem != null && AppInfo.TodosByUser.ContainsKey(UserId))
+        if (UpdatedId != 0 && AppInfo.CurrentProfileId.HasValue)
         {
-            StatusItem.SetStatus(OldStatus);
-            Console.WriteLine($"Отменена смена статуса. Восстановлен статус: {OldStatus}");
-            AppInfo.TodosByUser[UserId].NotifyStatusChanged(StatusItem);
+            var item = AppInfo.TodoRepo.GetById(UpdatedId);
+            if (item != null)
+            {
+                item.SetStatus(OldStatus);
+                AppInfo.TodoRepo.Update(item);
+                var todoList = AppInfo.GetCurrentTodoList();
+                var index = todoList.items.FindIndex(i => i.Id == UpdatedId);
+                if (index >= 0) todoList.items[index].SetStatus(OldStatus);
+                Console.WriteLine($"Отменена смена статуса. Восстановлен статус: {OldStatus}");
+            }
         }
     }
 }
